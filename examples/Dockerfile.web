@@ -1,0 +1,62 @@
+# This assumes that the parent image has been built locally using production and development build configuration as defra-node 
+# and defra-node-development tagged with a version.
+
+ARG BASE_VERSION=1.0.0
+FROM defra-node:$BASE_VERSION AS base
+
+# Set the port that is going to be exposed later on in the Dockerfile as well.
+ARG PORT=3000
+ENV PORT ${PORT}
+
+# Copy our package files so that our package install will do a clean install. This installs the exact versions of the packages
+#   listed in package-lock.json, and does not update either the package-lock.json or the package.json file.
+# Our production dependancies are now installed.
+COPY --chown=node:node package*.json ./
+RUN npm ci
+
+# Development stage installs devDependencies, builds app from source and declares a file watcher as the default command.
+#   We name this stage so we can refer to it in later stages
+FROM defra-node-development:$BASE_VERSION AS development
+
+# Expose the PORT passed in to the Dockerfile, and also some development debugging ports that are used during development
+EXPOSE ${PORT} 9229 9230
+
+# We copy the installed packages from the production "base" install that was the first stage.
+COPY --from=base --chown=node:node /home/node/package*.json ./
+
+# We run a full dev install to bring in any development packages
+RUN npm install --production=false
+COPY --chown=node:node app/ ./app/
+
+# Run the build command to get the extra files needed for production. We also specify a command here,
+#   as we can run this stage directly using either docker-compose files, or passing --target to the docker build command
+RUN npm run build
+CMD [ "npm", "run", "start:watch" ]
+
+# Test stage copied in Jest configuration and declares the test task as the default command. We use the development stage
+#   for this as it will have all the tools required installed and have everything ready to run tests
+FROM development AS test
+
+# We copy the extra files needed for the tests into this image
+COPY --chown=node:node jest.config.js ./jest.config.js
+COPY --chown=node:node test/ ./test/
+CMD [ "npm", "run", "test" ]
+
+# Production stage exposes service port, copies in built app code and declares the Node app as the default command
+FROM base AS production
+
+# Again, be explict about the permissions we want for this stage
+USER node
+WORKDIR /home/node
+
+# Expose the PORT passed in at the start of the file
+EXPOSE ${PORT}
+
+# Copy in the files that we built using the tools in the development stage. The final production stage will have the built files,
+#   but none of the tools required to build those files. This reduces the attack surface, and also the size of the final production image
+COPY --from=development /home/node/app/ ./app/
+
+# This is the command that is run for the production service. The parent image has an ENTRYPOINT that uses a lightweight
+#   init program "tini" that handles signals. As long as we don't override the ENTRYPOINT the "tini" routine will handle signals and
+#   orphaned processes
+CMD [ "node", "app/index" ]
