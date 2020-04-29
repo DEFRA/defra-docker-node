@@ -36,4 +36,10 @@ USER root
 RUN apk update && \
     apk add --no-cache git=2.24.1-r0 && \
     apk add --no-cache --virtual .gyp python=2.7.16-r3 make=4.2.1-r2 g++=9.2.0-r3
+
+# Pact contract testing requires additional binaries not present in Alpine images
+RUN  apk --no-cache add ca-certificates wget bash \
+  && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
+  && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.29-r0/glibc-2.29-r0.apk \
+  && apk add glibc-2.29-r0.apk
 USER node
