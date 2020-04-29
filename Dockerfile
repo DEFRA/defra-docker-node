@@ -14,7 +14,7 @@ ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
 ENV PATH=$PATH:/home/node/.npm-global/bin
 
 # We need a basic init process to handle signals and reap zombie processes, tini handles that
-RUN apk update && apk add --no-cache tini=0.18.0-r0
+RUN apk update && apk add --no-cache tini=~0.18
 ENTRYPOINT ["/sbin/tini", "--"]
 
 # Never run as root, default to the node user (created by the base Node image)
@@ -34,6 +34,6 @@ ENV NODE_ENV development
 # node-gyp is a common requirement for NPM packages. It must be installed as root.
 USER root
 RUN apk update && \
-    apk add --no-cache git=2.24.1-r0 && \
-    apk add --no-cache --virtual .gyp python=2.7.16-r3 make=4.2.1-r2 g++=9.2.0-r3
+    apk add --no-cache git=~2.24 && \
+    apk add --no-cache --virtual .gyp python=~2.7 make=~4.2 g++=~9.2
 USER node
