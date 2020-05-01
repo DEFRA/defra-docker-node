@@ -1,5 +1,5 @@
 # Set default values for build arguments
-ARG DOCKERFILE_VERSION=1.0.0
+ARG DOCKERFILE_VERSION=1.0.1
 ARG NODE_VERSION=12.16.0
 
 FROM node:$NODE_VERSION-alpine AS production
@@ -25,11 +25,14 @@ WORKDIR /home/node
 
 # Label images to aid searching
 LABEL uk.gov.defra.node.node-version=$NODE_VERSION \
-      uk.gov.defra.node.version=$DOCKERFILE_VERSION
+      uk.gov.defra.node.version=$DOCKERFILE_VERSION \
+      uk.gov.defra.node.repository=defradigital/node
 
 FROM production AS development
 
 ENV NODE_ENV development
+
+LABEL uk.gov.defra.node.repository=defradigital/node-development
 
 # node-gyp is a common requirement for NPM packages. It must be installed as root.
 USER root
