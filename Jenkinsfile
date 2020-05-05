@@ -3,7 +3,7 @@ def dockerfileVersion = '1.0.1'
 def nodeVersion = '12.16.0'
 
 // Constants
-def registry = defradigital
+def registry = 'defradigital'
 def imageNameDevelopment = 'node-development'
 def imageNameProduction = 'node'
 def regCredsId = DOCKERHUB_CREDENTIALS_ID
