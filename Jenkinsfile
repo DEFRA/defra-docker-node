@@ -1,5 +1,5 @@
 // Versioning - edit these variables to set version information
-dockerfileVersion = '1.0.2'
+dockerfileVersion = '1.0.3'
 nodeVersion = '12.16.0'
 
 // Constants
