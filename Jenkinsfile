@@ -16,15 +16,6 @@ imageRepositoryProduction = ''
 imageRepositoryDevelopmentLatest = ''
 imageRepositoryProductionLatest = ''
 
-def abortIfNotMaster() {
-  if(BRANCH_NAME == 'master') {
-    echo 'Building master branch'
-  } else {
-    currentBuild.result = 'ABORTED'
-    echo 'Build aborted - not a master branch'
-  }
-}
-
 def setVariables() {
   repoUrl = getRepoUrl()
   commitSha = getCommitSha()
@@ -78,27 +69,26 @@ node {
     stage('Set GitHub status pending') {
       updateGithubCommitStatus('Build started', 'PENDING')
     }
-    stage('Check master branch') {
-      abortIfNotMaster()
-    }
-    stage('Set variables') {
-      setVariables()
-    }
-    stage('Build development image') {
-      buildImage(imageRepositoryDevelopment, 'development')
-      buildImage(imageRepositoryDevelopmentLatest, 'development')
-    }
-    stage('Build production image') {
-      buildImage(imageRepositoryProduction, 'production')
-      buildImage(imageRepositoryProductionLatest, 'production')
-    }
-    stage('Push development image') {
-      pushImage(imageRepositoryDevelopment)
-      pushImage(imageRepositoryDevelopmentLatest)
-    }
-    stage('Push production image') {
-      pushImage(imageRepositoryProduction)
-      pushImage(imageRepositoryProductionLatest)
+    if(BRANCH_NAME == 'master') {
+      stage('Set variables') {
+        setVariables()
+      }
+      stage('Build development image') {
+        buildImage(imageRepositoryDevelopment, 'development')
+        buildImage(imageRepositoryDevelopmentLatest, 'development')
+      }
+      stage('Build production image') {
+        buildImage(imageRepositoryProduction, 'production')
+        buildImage(imageRepositoryProductionLatest, 'production')
+      }
+      stage('Push development image') {
+        pushImage(imageRepositoryDevelopment)
+        pushImage(imageRepositoryDevelopmentLatest)
+      }
+      stage('Push production image') {
+        pushImage(imageRepositoryProduction)
+        pushImage(imageRepositoryProductionLatest)
+      }
     }
     stage('Set GitHub status success') {
       updateGithubCommitStatus('Build successful', 'SUCCESS')
