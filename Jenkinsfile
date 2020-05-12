@@ -1,12 +1,11 @@
 // Versioning - edit these variables to set version information
-dockerfileVersion = '1.0.3'
-nodeVersion = '12.16.0'
+dockerfileVersion = '1.0.2'
+nodeVersion = '12.16.0-test'
 
 // Constants
 registry = DOCKER_REGISTRY
 imageNameDevelopment = 'node-development'
 imageNameProduction = 'node'
-regCredsId = DOCKERHUB_CREDENTIALS_ID
 
 // Variables
 repoUrl = ''
@@ -65,7 +64,10 @@ def buildImage(image, target) {
 }
 
 def pushImage(image) {
-  docker.withRegistry('', regCredsId) {
+  docker.withRegistry([
+    credentialsId: DOCKERHUB_CREDENTIALS_ID,
+    url: ''
+    ]) {
     sh "docker push $image"
   }
 }
