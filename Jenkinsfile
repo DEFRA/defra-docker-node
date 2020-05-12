@@ -17,11 +17,11 @@ imageRepositoryDevelopmentLatest = ''
 imageRepositoryProductionLatest = ''
 
 def abortIfNotMaster() {
-  if(BRANCH_NAME != 'master') {
+  if(BRANCH_NAME == 'master') {
     echo 'Building master branch'
   } else {
     currentBuild.result = 'ABORTED'
-    error('Build aborted - not a master branch')
+    echo 'Build aborted - not a master branch'
   }
 }
 
@@ -29,7 +29,7 @@ def setVariables() {
   repoUrl = getRepoUrl()
   commitSha = getCommitSha()
   echo registry
-  versionTag = "$dockerfileVersion-node$nodeVersion-test"
+  versionTag = "$dockerfileVersion-node$nodeVersion"
   imageRepositoryDevelopment = "$registry/$imageNameDevelopment:$versionTag"
   imageRepositoryProduction = "$registry/$imageNameProduction:$versionTag"
   imageRepositoryDevelopmentLatest = "$registry/$imageNameDevelopment"
