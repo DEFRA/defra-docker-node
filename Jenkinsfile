@@ -1,21 +1,21 @@
 // Versioning - edit these variables to set version information
-def dockerfileVersion = '1.0.3'
-def nodeVersion = '12.16.0'
+dockerfileVersion = '1.0.3'
+nodeVersion = '12.16.0'
 
 // Constants
-def registry = 'defradigital'
-def imageNameDevelopment = 'node-development'
-def imageNameProduction = 'node'
-def regCredsId = DOCKERHUB_CREDENTIALS_ID
+registry = DOCKER_REGISTRY
+imageNameDevelopment = 'node-development'
+imageNameProduction = 'node'
+regCredsId = DOCKERHUB_CREDENTIALS_ID
 
 // Variables
-def repoUrl = ''
-def commitSha = ''
-def versionTag = ''
-def imageRepositoryDevelopment = ''
-def imageRepositoryProduction = ''
-def imageRepositoryDevelopmentLatest = ''
-def imageRepositoryProductionLatest = ''
+repoUrl = ''
+commitSha = ''
+versionTag = ''
+imageRepositoryDevelopment = ''
+imageRepositoryProduction = ''
+imageRepositoryDevelopmentLatest = ''
+imageRepositoryProductionLatest = ''
 
 def abortIfNotMaster() {
   if(BRANCH_NAME != 'master') {
