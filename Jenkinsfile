@@ -29,7 +29,7 @@ def abortIfNotMaster() {
 def setVariables() {
   repoUrl = getRepoUrl()
   commitSha = getCommitSha()
-  echo dockerfileVersion
+  echo registry
   versionTag = "$dockerfileVersion-node$nodeVersion"
   imageRepositoryDevelopment = "$registry/$imageNameDevelopment:$versionTag"
   imageRepositoryProduction = "$registry/$imageNameProduction:$versionTag"
