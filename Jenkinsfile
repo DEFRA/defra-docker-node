@@ -29,6 +29,7 @@ def abortIfNotMaster() {
 def setVariables() {
   repoUrl = getRepoUrl()
   commitSha = getCommitSha()
+  echo dockerfileVersion
   versionTag = "$dockerfileVersion-node$nodeVersion"
   imageRepositoryDevelopment = "$registry/$imageNameDevelopment:$versionTag"
   imageRepositoryProduction = "$registry/$imageNameProduction:$versionTag"
@@ -57,7 +58,7 @@ def updateGithubCommitStatus(message, state) {
 def buildImage(image, target) {
   sh "docker build --no-cache \
     --tag $image \
-    --build-arg NODE_VERSION=${nodeVersion} \
+    --build-arg NODE_VERSION=$nodeVersion \
     --build-arg VERSION=$dockerfileVersion \
     --target $target \
     ."
