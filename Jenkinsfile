@@ -29,7 +29,7 @@ def abortIfNotMaster() {
 def setVariables() {
   repoUrl = getRepoUrl()
   commitSha = getCommitSha()
-  versionTag = "${dockerfileVersion}-node${nodeVersion}"
+  versionTag = "$dockerfileVersion-node$nodeVersion"
   imageRepositoryDevelopment = "$registry/$imageNameDevelopment:$versionTag"
   imageRepositoryProduction = "$registry/$imageNameProduction:$versionTag"
   imageRepositoryDevelopmentLatest = "$registry/$imageNameDevelopment"
@@ -72,11 +72,11 @@ def pushImage(image) {
 node {
   checkout scm
   try {
-    stage('Check master branch') {
-      abortIfNotMaster()
-    }
     stage('Set GitHub status pending') {
       updateGithubCommitStatus('Build started', 'PENDING')
+    }
+    stage('Check master branch') {
+      abortIfNotMaster()
     }
     stage('Set variables') {
       setVariables()
