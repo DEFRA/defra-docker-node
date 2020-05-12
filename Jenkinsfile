@@ -64,10 +64,10 @@ def buildImage(image, target) {
 }
 
 def pushImage(image) {
-  withDockerRegistry([
-    credentialsId: DOCKERHUB_CREDENTIALS_ID,
-    url: ''
-    ]) {
+  withCredentials([
+    usernamePassword(credentialsId : DOCKERHUB_CREDENTIALS_ID, usernameVariable: username, passwordVariable: password)    
+  ]) {
+    sh "docker login --username $username --password $password"
     sh "docker push $image"
   }
 }
