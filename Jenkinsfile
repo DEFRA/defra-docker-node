@@ -1,5 +1,5 @@
 // Versioning - edit these variables to set version information
-def dockerfileVersion = '1.0.2'
+def dockerfileVersion = '1.0.3'
 def nodeVersion = '12.16.0'
 
 // Constants
@@ -18,7 +18,7 @@ def imageRepositoryDevelopmentLatest = ''
 def imageRepositoryProductionLatest = ''
 
 def abortIfNotMaster() {
-  if(BRANCH_NAME == 'master') {
+  if(BRANCH_NAME != 'master') {
     echo 'Building master branch'
   } else {
     currentBuild.result = 'ABORTED'
