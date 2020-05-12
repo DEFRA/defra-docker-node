@@ -64,7 +64,7 @@ def buildImage(image, target) {
 }
 
 def pushImage(image) {
-  docker.withRegistry([
+  withDockerRegistry([
     credentialsId: DOCKERHUB_CREDENTIALS_ID,
     url: ''
     ]) {
