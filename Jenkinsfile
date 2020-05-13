@@ -83,7 +83,7 @@ node {
     stage('Set GitHub status pending') {
       updateGithubCommitStatus('Build started', 'PENDING')
     }
-    if(BRANCH_NAME != 'master') {
+    if(BRANCH_NAME == 'master') {
       stage('Set variables') {
         setVariables()
       }
