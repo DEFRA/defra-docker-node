@@ -15,6 +15,7 @@ imageRepositoryDevelopment = ''
 imageRepositoryProduction = ''
 imageRepositoryDevelopmentLatest = ''
 imageRepositoryProductionLatest = ''
+tagExists = false
 
 def setVariables() {
   repoUrl = getRepoUrl()
@@ -45,6 +46,19 @@ def updateGithubCommitStatus(message, state) {
   ])
 }
 
+def getImageTags(image) {
+  def tags = sh(script: "curl https://index.docker.io/v1/repositories/$image/tags", returnStdout: true)
+  return tags
+}
+
+def checkTagExists(image) {
+  def existingTags = getImageTags(image)
+  if(existingTags.contains(versionTag)) {
+    echo "current tag exists in repository"
+    tagExists = true
+  }
+}
+
 def buildImage(image, target) {
   sh "docker build --no-cache \
     --tag $image \
@@ -73,21 +87,26 @@ node {
       stage('Set variables') {
         setVariables()
       }
-      stage('Build development image') {
-        buildImage(imageRepositoryDevelopment, 'development')
-        buildImage(imageRepositoryDevelopmentLatest, 'development')
+      stage('Check if tag exists in repository') {
+        checkTagExists(imageRepositoryProductionLatest)
       }
-      stage('Build production image') {
-        buildImage(imageRepositoryProduction, 'production')
-        buildImage(imageRepositoryProductionLatest, 'production')
-      }
-      stage('Push development image') {
-        pushImage(imageRepositoryDevelopment)
-        pushImage(imageRepositoryDevelopmentLatest)
-      }
-      stage('Push production image') {
-        pushImage(imageRepositoryProduction)
-        pushImage(imageRepositoryProductionLatest)
+      if(!tagExists) {
+        stage('Build development image') {
+          buildImage(imageRepositoryDevelopment, 'development')
+          buildImage(imageRepositoryDevelopmentLatest, 'development')
+        }
+        stage('Build production image') {
+          buildImage(imageRepositoryProduction, 'production')
+          buildImage(imageRepositoryProductionLatest, 'production')
+        }
+        stage('Push development image') {
+          pushImage(imageRepositoryDevelopment)
+          pushImage(imageRepositoryDevelopmentLatest)
+        }
+        stage('Push production image') {
+          pushImage(imageRepositoryProduction)
+          pushImage(imageRepositoryProductionLatest)
+        }
       }
     }
     stage('Set GitHub status success') {
