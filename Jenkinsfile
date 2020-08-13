@@ -93,8 +93,8 @@ node {
         setCommonVariables()
       }
       nodeVersions.each {
-        stage('Set commit variables') {
-          setCommonVariables(it)
+        stage('Set image variables') {
+          setImageVariables(it)
         }
         stage('Check if tag exists in repository') {
           checkTagExists(imageRepositoryProductionLatest)
