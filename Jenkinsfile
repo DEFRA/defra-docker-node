@@ -101,10 +101,10 @@ node {
         }
         if(tagExists) {
           stage("Build development image ($versionTag)") {
-            buildImage(imageRepositoryDevelopment, 'development', versionTag)
+            buildImage(imageRepositoryDevelopment, 'development', it)
           }
           stage("Build production image ($versionTag)") {
-            buildImage(imageRepositoryProduction, 'production', versionTag)
+            buildImage(imageRepositoryProduction, 'production', it)
           }
           stage("Push development image ($versionTag)") {
             pushImage(imageRepositoryDevelopment)
@@ -114,10 +114,10 @@ node {
           }
           if(it == latestVersion) {
             stage('Build development image (latest)') {
-              buildImage(imageRepositoryDevelopmentLatest, 'development', versionTag)              
+              buildImage(imageRepositoryDevelopmentLatest, 'development', it)              
             }
             stage('Build production image (latest)') {
-              buildImage(imageRepositoryProductionLatest, 'production', versionTag)              
+              buildImage(imageRepositoryProductionLatest, 'production', it)              
             }
             stage('Push development image (latest)') {
               pushImage(imageRepositoryDevelopmentLatest)              
