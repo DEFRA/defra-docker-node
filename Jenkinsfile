@@ -85,13 +85,13 @@ def pushImage(image) {
 node {
   checkout scm
   try {
+    stage('Set common variables') {
+      setCommonVariables()
+    }
     stage('Set GitHub status pending') {
       updateGithubCommitStatus('Build started', 'PENDING')
     }
     if(BRANCH_NAME == 'master') {
-      stage('Set common variables') {
-        setCommonVariables()
-      }
       nodeVersions.each {
         stage('Set image variables') {
           setImageVariables(it)
@@ -114,16 +114,16 @@ node {
           }
           if(it == latestVersion) {
             stage('Build development image (latest)') {
-              buildImage(imageRepositoryDevelopmentLatest, 'development', it)              
+              buildImage(imageRepositoryDevelopmentLatest, 'development', it)
             }
             stage('Build production image (latest)') {
-              buildImage(imageRepositoryProductionLatest, 'production', it)              
+              buildImage(imageRepositoryProductionLatest, 'production', it)
             }
             stage('Push development image (latest)') {
-              pushImage("$imageRepositoryDevelopmentLatest:latest")              
+              pushImage("$imageRepositoryDevelopmentLatest:latest")
             }
             stage('Push production image (latest)') {
-              pushImage("$imageRepositoryProductionLatest:latest")              
+              pushImage("$imageRepositoryProductionLatest:latest")
             }
           }
         }
