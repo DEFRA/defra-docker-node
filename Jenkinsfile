@@ -1,6 +1,7 @@
 // Versioning - edit these variables to set version information
 dockerfileVersion = '1.0.2'
-nodeVersion = '12.16.0'
+latestVersion = '12.16.0'
+nodeVersions = ['12.16.0', '8.17.0']
 
 // Constants
 registry = DOCKER_REGISTRY
@@ -17,15 +18,17 @@ imageRepositoryDevelopmentLatest = ''
 imageRepositoryProductionLatest = ''
 tagExists = false
 
-def setVariables() {
+def setCommonVariables() {
   repoUrl = getRepoUrl()
   commitSha = getCommitSha()
-  echo registry
-  versionTag = "$dockerfileVersion-node$nodeVersion"
-  imageRepositoryDevelopment = "$registry/$imageNameDevelopment:$versionTag"
-  imageRepositoryProduction = "$registry/$imageNameProduction:$versionTag"
   imageRepositoryDevelopmentLatest = "$registry/$imageNameDevelopment"
   imageRepositoryProductionLatest = "$registry/$imageNameProduction"
+}
+
+def setImageVariables(nodeVersion) {
+  versionTag = "$dockerfileVersion-node$nodeVersion"
+  imageRepositoryDevelopment = "$registry/$imageNameDevelopment:$versionTag"
+  imageRepositoryProduction = "$registry/$imageNameProduction:$versionTag"  
 }
 
 def getRepoUrl() {
@@ -56,6 +59,8 @@ def checkTagExists(image) {
   if(existingTags.contains(versionTag)) {
     echo "current tag exists in repository"
     tagExists = true
+  } else {
+    tagExists = false
   }
 }
 
@@ -84,28 +89,43 @@ node {
       updateGithubCommitStatus('Build started', 'PENDING')
     }
     if(BRANCH_NAME == 'master') {
-      stage('Set variables') {
-        setVariables()
+      stage('Set commit variables') {
+        setCommitVariables()
       }
-      stage('Check if tag exists in repository') {
-        checkTagExists(imageRepositoryProductionLatest)
-      }
-      if(!tagExists) {
-        stage('Build development image') {
-          buildImage(imageRepositoryDevelopment, 'development')
-          buildImage(imageRepositoryDevelopmentLatest, 'development')
+      nodeVersions.each {
+        stage('Set commit variables') {
+          setCommonVariables(it)
         }
-        stage('Build production image') {
-          buildImage(imageRepositoryProduction, 'production')
-          buildImage(imageRepositoryProductionLatest, 'production')
+        stage('Check if tag exists in repository') {
+          checkTagExists(imageRepositoryProductionLatest)
         }
-        stage('Push development image') {
-          pushImage(imageRepositoryDevelopment)
-          pushImage(imageRepositoryDevelopmentLatest)
-        }
-        stage('Push production image') {
-          pushImage(imageRepositoryProduction)
-          pushImage(imageRepositoryProductionLatest)
+        if(!tagExists) {
+          stage("Build development image ($versionTag)") {
+            buildImage(imageRepositoryDevelopment, 'development')
+          }
+          stage("Build production image ($versionTag)") {
+            buildImage(imageRepositoryProduction, 'production')
+          }
+          stage("Push development image ($versionTag)") {
+            pushImage(imageRepositoryDevelopment)
+          }
+          stage("Push production image ($versionTag)") {
+            pushImage(imageRepositoryProduction)
+          }
+          if(it == latestVersion) {
+            stage('Build development image (latest)') {
+              buildImage(imageRepositoryDevelopmentLatest, 'development')              
+            }
+            stage('Build production image (latest)') {
+              buildImage(imageRepositoryProductionLatest, 'production')              
+            }
+            stage('Push development image (latest)') {
+              pushImage(imageRepositoryDevelopmentLatest)              
+            }
+            stage('Push production image (latest)') {
+              pushImage(imageRepositoryProductionLatest)              
+            }
+          }
         }
       }
     }
