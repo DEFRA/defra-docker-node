@@ -64,7 +64,7 @@ def checkTagExists(image) {
   }
 }
 
-def buildImage(image, target) {
+def buildImage(image, target, nodeVersion) {
   sh "docker build --no-cache \
     --tag $image \
     --build-arg NODE_VERSION=$nodeVersion \
@@ -101,10 +101,10 @@ node {
         }
         if(tagExists) {
           stage("Build development image ($versionTag)") {
-            buildImage(imageRepositoryDevelopment, 'development')
+            buildImage(imageRepositoryDevelopment, 'development', versionTag)
           }
           stage("Build production image ($versionTag)") {
-            buildImage(imageRepositoryProduction, 'production')
+            buildImage(imageRepositoryProduction, 'production', versionTag)
           }
           stage("Push development image ($versionTag)") {
             pushImage(imageRepositoryDevelopment)
@@ -114,10 +114,10 @@ node {
           }
           if(it == latestVersion) {
             stage('Build development image (latest)') {
-              buildImage(imageRepositoryDevelopmentLatest, 'development')              
+              buildImage(imageRepositoryDevelopmentLatest, 'development', versionTag)              
             }
             stage('Build production image (latest)') {
-              buildImage(imageRepositoryProductionLatest, 'production')              
+              buildImage(imageRepositoryProductionLatest, 'production', versionTag)              
             }
             stage('Push development image (latest)') {
               pushImage(imageRepositoryDevelopmentLatest)              
