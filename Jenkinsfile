@@ -1,7 +1,7 @@
 // Versioning - edit these variables to set version information
 dockerfileVersion = '1.0.2'
 latestVersion = '12.16.0'
-nodeVersions = ['12.16.0', '8.17.0']
+nodeVersions = ['8.17.0', '12.16.0']
 
 // Constants
 registry = DOCKER_REGISTRY
