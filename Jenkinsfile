@@ -89,8 +89,8 @@ node {
       updateGithubCommitStatus('Build started', 'PENDING')
     }
     if(BRANCH_NAME != 'master') {
-      stage('Set commit variables') {
-        setCommitVariables()
+      stage('Set common variables') {
+        setCommonVariables()
       }
       nodeVersions.each {
         stage('Set commit variables') {
