@@ -96,7 +96,7 @@ node {
         stage('Set image variables') {
           setImageVariables(it)
         }
-        stage('Check if tag exists in repository') {
+        stage("Check if tag exists in repository ($versionTag)") {
           checkTagExists(imageRepositoryProductionLatest)
         }
         if(!tagExists) {
