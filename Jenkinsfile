@@ -99,7 +99,7 @@ node {
         stage("Check if tag exists in repository ($versionTag)") {
           checkTagExists(imageRepositoryProductionLatest)
         }
-        if(!tagExists) {
+        if(tagExists) {
           stage("Build development image ($versionTag)") {
             buildImage(imageRepositoryDevelopment, 'development')
           }
