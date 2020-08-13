@@ -120,10 +120,10 @@ node {
               buildImage(imageRepositoryProductionLatest, 'production', it)              
             }
             stage('Push development image (latest)') {
-              pushImage(imageRepositoryDevelopmentLatest)              
+              pushImage("$imageRepositoryDevelopmentLatest:latest")              
             }
             stage('Push production image (latest)') {
-              pushImage(imageRepositoryProductionLatest)              
+              pushImage("$imageRepositoryProductionLatest:latest")              
             }
           }
         }
