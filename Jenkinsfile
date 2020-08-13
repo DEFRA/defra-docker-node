@@ -96,20 +96,20 @@ node {
         stage('Set image variables') {
           setImageVariables(it)
         }
-        stage("Check if tag exists in repository ($versionTag)") {
+        stage("Check if tag exists in repository ($it)") {
           checkTagExists(imageRepositoryProductionLatest)
         }
         if(tagExists) {
-          stage("Build development image ($versionTag)") {
+          stage("Build development image ($it)") {
             buildImage(imageRepositoryDevelopment, 'development', it)
           }
-          stage("Build production image ($versionTag)") {
+          stage("Build production image ($it)") {
             buildImage(imageRepositoryProduction, 'production', it)
           }
-          stage("Push development image ($versionTag)") {
+          stage("Push development image ($it)") {
             pushImage(imageRepositoryDevelopment)
           }
-          stage("Push production image ($versionTag)") {
+          stage("Push production image ($it)") {
             pushImage(imageRepositoryProduction)
           }
           if(it == latestVersion) {
