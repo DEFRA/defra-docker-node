@@ -1,8 +1,8 @@
 # Set default values for build arguments
 ARG DOCKERFILE_VERSION=1.0.2
-ARG NODE_VERSION=12.16.0
+ARG NODE_VERSION=12.18.3
 
-FROM node:$NODE_VERSION-alpine AS production
+FROM node:$NODE_VERSION-alpine3.12 AS production
 
 ARG NODE_VERSION
 ARG DOCKERFILE_VERSION
@@ -14,7 +14,7 @@ ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
 ENV PATH=$PATH:/home/node/.npm-global/bin
 
 # We need a basic init process to handle signals and reap zombie processes, tini handles that
-RUN apk update && apk add --no-cache tini=~0.18
+RUN apk update && apk add --no-cache tini=~0.19
 ENTRYPOINT ["/sbin/tini", "--"]
 
 # Never run as root, default to the node user (created by the base Node image)
@@ -37,8 +37,8 @@ LABEL uk.gov.defra.node.repository=defradigital/node-development
 # node-gyp is a common requirement for NPM packages. It must be installed as root.
 USER root
 RUN apk update && \
-    apk add --no-cache git=~2.24 && \
-    apk add --no-cache --virtual .gyp python=~2.7 make=~4.2 g++=~9.2
+    apk add --no-cache git=~2.26 && \
+    apk add --no-cache --virtual .gyp python2=~2.7 make=~4.3 g++=~9.3
 # Pact dependencies are not included in Alpine image for contract testing
 RUN  apk --no-cache add ca-certificates wget bash \
     && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \

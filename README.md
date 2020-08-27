@@ -22,7 +22,7 @@ Images should be tagged according to the Dockerfile version and the version of N
 `Dockerfile.service` - This is an example project that doesn't expose any external ports (a message based service). There is also no build step in this Dockerfile.
 
 ## CI/CD
-On commit to master Jenkins will build both `node` and `node-development` images and push them to the `defradigital` organisation in GitHub if the tag specified in `./Jenkinsfile` does not already exist in DockerHub.  
+On commit to master Jenkins will build both `node` and `node-development` images and push them to the `defradigital` organisation in GitHub if the tag specified in `./Jenkinsfile` does not already exist in DockerHub.
 
 ## Licence
 

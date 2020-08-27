@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+  node:
+    build: 
+      context: .
+      target: production
+    image: defradigital/node:1.1.0-node12.16.0
+  node-development:
+    build: 
+      context: .
+      target: development
+    image: defradigital/node-development:1.1.0-node12.16.0
