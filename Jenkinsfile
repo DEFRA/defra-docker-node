@@ -1,7 +1,11 @@
 // Versioning - edit these variables to set version information
 dockerfileVersion = '1.0.2'
 latestVersion = '12.16.0'
-nodeVersions = ['8.17.0-alpine', '12.18.3-alpine3.12']
+nodeVersions = [
+    [version: '8.17.0', tag: '8.17.0-alpine'], 
+    [version: '12.18.3', tag: '12.18.3-alpine3.12']
+]
+
 
 // Constants
 registry = DOCKER_REGISTRY
@@ -28,7 +32,7 @@ def setCommonVariables() {
 def setImageVariables(nodeVersion) {
   versionTag = "$dockerfileVersion-node$nodeVersion"
   imageRepositoryDevelopment = "$registry/$imageNameDevelopment:$versionTag"
-  imageRepositoryProduction = "$registry/$imageNameProduction:$versionTag"  
+  imageRepositoryProduction = "$registry/$imageNameProduction:$versionTag"
 }
 
 def getRepoUrl() {
@@ -93,31 +97,33 @@ node {
     }
     if(BRANCH_NAME == 'master') {
       nodeVersions.each {
+        def version = it.version
+        def tag = version.tag
         stage('Set image variables') {
           setImageVariables(it)
         }
-        stage("Check if tag exists in repository ($it)") {
+        stage("Check if tag exists in repository ($version)") {
           checkTagExists(imageRepositoryProductionLatest)
         }
         if(!tagExists) {
-          stage("Build development image ($it)") {
-            buildImage(imageRepositoryDevelopment, 'development', it)
+          stage("Build development image ($version)") {
+            buildImage(imageRepositoryDevelopment, 'development', tag)
           }
-          stage("Build production image ($it)") {
-            buildImage(imageRepositoryProduction, 'production', it)
+          stage("Build production image ($version)") {
+            buildImage(imageRepositoryProduction, 'production', tag)
           }
-          stage("Push development image ($it)") {
+          stage("Push development image ($version)") {
             pushImage(imageRepositoryDevelopment)
           }
-          stage("Push production image ($it)") {
+          stage("Push production image ($version)") {
             pushImage(imageRepositoryProduction)
           }
           if(it == latestVersion) {
             stage('Build development image (latest)') {
-              buildImage(imageRepositoryDevelopmentLatest, 'development', it)
+              buildImage(imageRepositoryDevelopmentLatest, 'development', tag)
             }
             stage('Build production image (latest)') {
-              buildImage(imageRepositoryProductionLatest, 'production', it)
+              buildImage(imageRepositoryProductionLatest, 'production', tag)
             }
             stage('Push development image (latest)') {
               pushImage("$imageRepositoryDevelopmentLatest:latest")
