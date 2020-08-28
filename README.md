@@ -2,7 +2,14 @@
 
 This repository contains Node parent Docker image source code for Defra.
 
-Two parent images are created from this repository:
+The following table lists the versions of node available, and the parent node image they are based on:
+
+| Node version  | Parent image      |
+| ------------- | ----------------- |
+| 8.17.0        | 8.17.0-alpine     |
+| 12.18.3       | 12.18.3-alpine3.12|
+
+Two parent images are created for each version:
 
 - defra-node
 - defra-node-development
