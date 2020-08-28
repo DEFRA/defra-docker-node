@@ -2,7 +2,14 @@
 
 This repository contains Node parent Docker image source code for Defra.
 
-Two parent images are created from this repository:
+The following table lists the versions of node available, and the parent node image they are based on:
+
+| Node version  | Parent image      |
+| ------------- | ----------------- |
+| 8.17.0        | 8.17.0-alpine     |
+| 12.18.3       | 12.18.3-alpine3.12|
+
+Two parent images are created for each version:
 
 - defra-node
 - defra-node-development
@@ -22,7 +29,7 @@ Images should be tagged according to the Dockerfile version and the version of N
 `Dockerfile.service` - This is an example project that doesn't expose any external ports (a message based service). There is also no build step in this Dockerfile.
 
 ## CI/CD
-On commit to master Jenkins will build both `node` and `node-development` images and push them to the `defradigital` organisation in GitHub if the tag specified in `./Jenkinsfile` does not already exist in DockerHub.  
+On commit to master Jenkins will build both `node` and `node-development` images and push them to the `defradigital` organisation in GitHub if the tag specified in `./Jenkinsfile` does not already exist in DockerHub.
 
 ## Licence
 
