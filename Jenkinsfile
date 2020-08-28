@@ -1,8 +1,8 @@
 // Versioning - edit these variables to set version information
-dockerfileVersion = '1.0.2'
-latestVersion = '12.16.0'
+dockerfileVersion = '1.1.0'
+latestVersion = '12.18.3'
 nodeVersions = [
-    [version: '8.17.0', tag: '8.17.0-alpine'], 
+    [version: '8.17.0', tag: '8.17.0-alpine'],
     [version: '12.18.3', tag: '12.18.3-alpine3.12']
 ]
 
@@ -98,9 +98,9 @@ node {
     if(BRANCH_NAME == 'master') {
       nodeVersions.each {
         def version = it.version
-        def tag = version.tag
+        def tag = it.tag
         stage('Set image variables') {
-          setImageVariables(it)
+          setImageVariables(version)
         }
         stage("Check if tag exists in repository ($version)") {
           checkTagExists(imageRepositoryProductionLatest)
@@ -118,7 +118,7 @@ node {
           stage("Push production image ($version)") {
             pushImage(imageRepositoryProduction)
           }
-          if(it == latestVersion) {
+          if(version == latestVersion) {
             stage('Build development image (latest)') {
               buildImage(imageRepositoryDevelopmentLatest, 'development', tag)
             }
