@@ -1,6 +1,6 @@
 # Set default values for build arguments
 ARG DOCKERFILE_VERSION=1.1.0
-ARG NODE_VERSION=12.18.3
+ARG NODE_VERSION=12.18.3-alpine
 
 FROM node:$NODE_VERSION AS production
 
