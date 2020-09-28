@@ -1,5 +1,5 @@
 // Versioning - edit these variables to set version information
-dockerfileVersion = '1.2.0'
+dockerfileVersion = '1.2.1'
 latestVersion = '12.18.3'
 nodeVersions = [
     [version: '8.17.0', tag: '8.17.0-alpine'],

@@ -1,5 +1,5 @@
 # Set default values for build arguments
-ARG DOCKERFILE_VERSION=1.2.0
+ARG DOCKERFILE_VERSION=1.2.1
 ARG NODE_VERSION=12.18.3-alpine3.12
 
 FROM node:$NODE_VERSION AS production
@@ -12,6 +12,7 @@ ENV NODE_ENV production
 # Set global npm dependencies to be stored under the node user directory
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
 ENV PATH=$PATH:/home/node/.npm-global/bin
+ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/internal-ca.crt
 
 # We need a basic init process to handle signals and reap zombie processes, tini handles that
 # Install Internal CA certificate
