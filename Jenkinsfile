@@ -1,5 +1,5 @@
 // Versioning - edit these variables to set version information
-dockerfileVersion = '1.1.0'
+dockerfileVersion = '1.2.0'
 latestVersion = '12.18.3'
 nodeVersions = [
     [version: '8.17.0', tag: '8.17.0-alpine'],
@@ -79,7 +79,7 @@ def buildImage(image, target, nodeVersion) {
 
 def pushImage(image) {
   withCredentials([
-    usernamePassword(credentialsId : DOCKERHUB_CREDENTIALS_ID, usernameVariable: 'username', passwordVariable: 'password')    
+    usernamePassword(credentialsId : DOCKERHUB_CREDENTIALS_ID, usernameVariable: 'username', passwordVariable: 'password')
   ]) {
     sh "docker login --username $username --password $password"
     sh "docker push $image"

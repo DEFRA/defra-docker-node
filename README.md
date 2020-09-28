@@ -18,6 +18,20 @@ It is recommended that services use [multi-stage builds](https://docs.docker.com
 
 [Examples](./example) are provided to show how parent images can be extended for different types of services. These should be a good starting point for building Node services conforming to FFC standards.
 
+## Building images locally
+
+To build the images locally, run:
+```
+docker build --no-cache --target <target> .
+```
+(where <target> is either `development` or `production`).
+
+This will build an image using the default `NODE_VERSION` as set in the [Dockerfile](Dockerfile).
+
+## Internal CA certificates
+
+The image includes the certificate for the internal [CA](https://en.wikipedia.org/wiki/Certificate_authority) so that traffic can traverse the network without encountering issues.
+
 ## Versioning
 
 Images should be tagged according to the Dockerfile version and the version of Node on which the image is based. For example, for Dockerfile version `1.0.0` based on Node `12.16.0`, the built image would be tagged `1.0.0-node12.16.0`.
@@ -29,7 +43,8 @@ Images should be tagged according to the Dockerfile version and the version of N
 `Dockerfile.service` - This is an example project that doesn't expose any external ports (a message based service). There is also no build step in this Dockerfile.
 
 ## CI/CD
-On commit to master Jenkins will build both `node` and `node-development` images and push them to the `defradigital` organisation in GitHub if the tag specified in `./Jenkinsfile` does not already exist in DockerHub.
+
+On commit to master Jenkins will build both `node` and `node-development` images and push them to the `defradigital` organisation in GitHub if the tag specified in the `nodeVersions` map within the `./Jenkinsfile` does not already exist in Docker Hub.
 
 ## Licence
 
