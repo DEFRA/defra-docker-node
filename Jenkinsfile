@@ -9,4 +9,4 @@ ImageMap[] imageMaps = [
 
 buildParentImage imageName: 'node',
   imageMaps: imageMaps,
-  version: '1.2.0'
+  version: '1.2.1'
