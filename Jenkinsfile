@@ -1,4 +1,4 @@
-@Library('defra-docker-jenkins@initial-setup') _
+@Library('defra-docker-jenkins@v-1') _
 
 import uk.gov.defra.ImageMap
 
