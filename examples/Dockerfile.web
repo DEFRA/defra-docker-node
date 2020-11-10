@@ -1,7 +1,7 @@
 # This assumes that the parent image has been built locally using production and development build configuration as defra-node 
 # and defra-node-development tagged with a version.
 
-ARG BASE_VERSION=1.0.0
+ARG BASE_VERSION=1.2.1-node12.18.3
 FROM defra-node:$BASE_VERSION AS base
 
 # Set the port that is going to be exposed later on in the Dockerfile as well.
