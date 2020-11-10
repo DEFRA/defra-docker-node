@@ -1,4 +1,4 @@
-@Library('defra-docker-jenkins@v-1') _
+@Library('defra-docker-jenkins@v-2') _
 
 import uk.gov.defra.ImageMap
 
@@ -9,4 +9,4 @@ ImageMap[] imageMaps = [
 
 buildParentImage imageName: 'node',
   imageMaps: imageMaps,
-  version: '1.2.1'
+  version: '1.2.2'
