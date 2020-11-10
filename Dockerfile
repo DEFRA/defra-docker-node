@@ -1,11 +1,11 @@
 # Set default values for build arguments
-ARG DOCKERFILE_VERSION=1.2.2
+ARG DEFRA_VERSION=1.2.2
 ARG BASE_VERSION=14.15.0-alpine3.12
 
 FROM node:$BASE_VERSION AS production
 
 ARG BASE_VERSION
-ARG DOCKERFILE_VERSION
+ARG DEFRA_VERSION
 
 ENV NODE_ENV production
 
@@ -30,7 +30,7 @@ WORKDIR /home/node
 
 # Label images to aid searching
 LABEL uk.gov.defra.node.node-version=$BASE_VERSION \
-      uk.gov.defra.node.version=$DOCKERFILE_VERSION \
+      uk.gov.defra.node.version=$DEFRA_VERSION \
       uk.gov.defra.node.repository=defradigital/node
 
 FROM production AS development
