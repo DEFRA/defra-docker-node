@@ -1,4 +1,4 @@
-name: ANCHORE-SCAN
+name: SCAN-ON-COMMIT
 
 on:
   push:
@@ -10,7 +10,6 @@ jobs:
       NODE_VERSION: 14.15.0
       ALPINE_VERSION: alpine3.12
       DEFRA_VERSION: 1.2.3
-      image_name: defradigital/node:1.2.1-node14.15.0
     runs-on: ubuntu-latest
 
     steps:
@@ -28,6 +27,6 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
         with:
-          name: anchore-reports-node14
+          name: anchore-reports-node14-pr
           path: anchore-reports
 
