@@ -1,8 +1,8 @@
 name: NIGHTLY-SCAN
 
 on:
-  schedule:
-    - cron: '0 1 * * *'
+  push:
+    branches: [ '*' ]
 
 jobs:
   scan-node14:
@@ -25,4 +25,3 @@ jobs:
           with:
             name: anchore-reports-node14
             path: anchore-reports
-
