@@ -1,4 +1,4 @@
-name: SCAN-PARALLEL
+name: ANCHORE-SCAN
 
 on:
   push:
