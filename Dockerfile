@@ -43,7 +43,7 @@ LABEL uk.gov.defra.node.repository=defradigital/node-development
 USER root
 RUN apk update && \
     apk add --no-cache git && \
-    apk add --no-cache --virtual .gyp python2=~2.7 make g++=~9.3
+    apk add --no-cache --virtual .gyp 'python2=~2.7' make 'g++=~9.3'
 # Pact dependencies are not included in Alpine image for contract testing
 RUN apk add --no-cache bash wget \
     && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \

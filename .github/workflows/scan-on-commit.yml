@@ -5,7 +5,7 @@ on:
     branches: [ '*' ]
 
 jobs:
-  scan-node14:
+  anchore-scan:
     env:
       NODE_VERSION: 14.15.0
       ALPINE_VERSION: alpine3.12
@@ -29,4 +29,3 @@ jobs:
         with:
           name: anchore-reports-node14-pr
           path: anchore-reports
-

@@ -1,11 +1,11 @@
 name: NIGHTLY-SCAN
 
 on:
-  push:
-    branches: [ '*' ]
+  schedule:
+    - cron: '0 1 * * *'
 
 jobs:
-  scan-node14:
+   anchore-scan:
       runs-on: ubuntu-latest
 
       steps:
