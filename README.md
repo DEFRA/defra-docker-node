@@ -7,7 +7,7 @@ The following table lists the versions of node available, and the parent node im
 | Node version  | Parent image       |
 | ------------- | -----------------  |
 | 12.18.3       | 12.18.3-alpine3.12 |
-| 14.15.0       | '14.15.0-alpine3.12|
+| 14.15.0       | 14.15.0-alpine3.12|
 
 Two parent images are created for each version:
 
@@ -48,27 +48,29 @@ On commit to master Jenkins will build both `node` and `node-development` images
 
 This image uses the [Defra Docker Shared Jenkins library](https://github.com/DEFRA/defra-docker-jenkins) to abstract pipeline complexity from repository.  See repository for further usage details.
 
-## Image Vulnerabilities - patching and exclusions
+## Image vulnerability scanning
 
 The repository runs a nightly scan of the latest parent image, and will scan images on commit to a branch.
+
+If the Anchore scan finds a vulnerability the scan will fail and a report will be stored as an artifact against the failed scan action at [Actions](https://github.com/DEFRA/defra-docker-node/actions).
+
 Note that the scan is performed using version 1 of the [Anchore Scan Action](https://github.com/anchore/scan-action/tree/version1) as version 2 does not yet support policy files.
 
-If the Anchore scan finds a vulnerability the scan will fail and a report will be stored as an artefact against the failed scan action at [Actions](https://github.com/DEFRA/defra-docker-node/actions).
-
-There are two solutions to an image vulnerability. Patching the Dockerfile to upgrade the vulnerable library, or to add it to the exclusion list if it is not exploitable.
+There are two solutions to address an image vulnerability: patch the Dockerfile to upgrade the vulnerable library, or to add the vulnerability to the exclusion list if it is not deemed exploitable.
 
 ### Adding a vulnerability to the exclusion list
 
-Generally speaking the only vulnerabilities that are excluded are binaries used by the npm command line tool, as these are not exploitable in a running container, and not straight forward to update.
+Generally speaking the only vulnerabilities that are excluded are binaries used by the npm command line tool, as these are not exploitable in a running container, and are not straight forward to update.
 
 The scan output on the GitHub Action log will provide details of the gate and trigger that has failed, along with the CVE ID of the vulnerability.
 
-The vulnerability report will also provide the CVE ID and package name in the file with the suffix `-vuln.json`.
+The vulnerability report will also provide the CVE ID and package name in a file with the suffix `-vuln.json`, available in the Github Action artifact.
+
 To exclude the vulnerability add an item to the `anchore-policy.json`'s `whitelists` section.
 
 The item will need a unique ID specified, the gate and trigger that has failed, and a trigger ID which comprises the CVE ID and package name separated with a `+`.
 
-The below JSON shows the format to add an exclusion for a failure on the `vulnerabilities` gate, on trigger `package` for `CVE-2020-8116` against the `dot-prop` package
+The below JSON shows the format to add an exclusion for a failure on the `vulnerabilities` gate, on trigger `package` for `CVE-2020-8116` against the `dot-prop` package:
 
 ```
 "whitelists": [
@@ -99,7 +101,7 @@ To install a specific version of a package you need to know the name and minimum
 apk add --no-cache 'libssl1.1>1.1.1'
 ```
 
-Note that the `>` symbol will install versions `1.1.1` or greater, so really acts like a `>=` operator.
+Note that the `>` symbol will install versions `1.1.1` or greater, so acts like a `>=` operator.
 
 The command should be placed after the `tini` installation, with a leading `&&`. The line above correctly updated would be:
 ```
