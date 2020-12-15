@@ -17,10 +17,17 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build the Docker image
         run: docker build . --file Dockerfile --no-cache --build-arg DEFRA_VERSION=$DEFRA_VERSION --build-arg BASE_VERSION=$NODE_VERSION-$ALPINE_VERSION --tag defradigital/node:$DEFRA_VERSION-node$NODE_VERSION
-      - uses: anchore/scan-action@master
+      - uses: anchore/scan-action@v1
         with:
-          image-reference: "localbuild/testimage:latest"
-          dockerfile-path: "Dockerfile"
+          image-reference: defradigital/node:$DEFRA_VERSION-node$NODE_VERSION
           fail-build: true
+          custom-policy-path: ./anchore-policy.json
+          include-app-packages: true
 
+      - name: Archive anchore report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: anchore-reports-node14
+          path: anchore-reports
 
