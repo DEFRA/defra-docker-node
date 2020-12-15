@@ -19,7 +19,7 @@ jobs:
         run: docker build . --file Dockerfile --no-cache --build-arg DEFRA_VERSION=$DEFRA_VERSION --build-arg BASE_VERSION=$NODE_VERSION-$ALPINE_VERSION --tag defradigital/node:$DEFRA_VERSION-node$NODE_VERSION
       - uses: anchore/scan-action@v1
         with:
-          image-reference: defradigital/node:$DEFRA_VERSION-node$NODE_VERSION
+          image-reference: defradigital/node:${{ env.DEFRA_VERSION }}-node${{ env.NODE_VERSION }}
           fail-build: true
           custom-policy-path: ./anchore-policy.json
           include-app-packages: true
