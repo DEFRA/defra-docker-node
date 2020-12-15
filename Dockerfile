@@ -16,7 +16,7 @@ ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/internal-ca.crt
 
 # We need a basic init process to handle signals and reap zombie processes, tini handles that
 # Install Internal CA certificate
-RUN apk update && apk add --no-cache tini && apk add ca-certificates && rm -rf /var/cache/apk/*
+RUN apk update && apk add --no-cache tini && apk add --no-cache 'libssl1.1>1.1.1i' && apk add --no-cache 'libcrypto1.1>1.1.1i' && apk add ca-certificates && rm -rf /var/cache/apk/*
 COPY certificates/internal-ca.crt /usr/local/share/ca-certificates/internal-ca.crt
 RUN chmod 644 /usr/local/share/ca-certificates/internal-ca.crt && update-ca-certificates
 
