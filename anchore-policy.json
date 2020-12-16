@@ -21,12 +21,8 @@
       "name": "NPM binaries Whitelist",
       "version": "1_0",
       "items": [
-        { "id": "item1", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "CVE-2020-8116+dot-prop" },
-        { "id": "item2", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "CVE-2020-7598+minimist" },
-        { "id": "item3", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "CVE-2020-7608+yargs-parser" },
-        { "id": "item4", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "CVE-2020-7754+npm-user-validate" },
-        { "id": "item5", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "GHSA-ff7x-qrg7-qggm+dot-prop" },
-        { "id": "item6", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "CVE-2020-7774+y18n" }
+        { "id": "item1", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "CVE-2020-7754+npm-user-validate" },
+        { "id": "item2", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "CVE-2020-7774+y18n" }
       ]
     }
   ],
