@@ -50,17 +50,20 @@ This image uses the [Defra Docker Shared Jenkins library](https://github.com/DEF
 
 ## Image vulnerability scanning
 
-The repository runs a nightly scan of the latest parent image, and will scan images on commit to a branch.
+The repository runs a nightly scan of the latest parent image, and will scan images on push to a branch.
 
-If the Anchore scan finds a vulnerability the scan will fail and a report will be stored as an artifact against the failed scan action at [Actions](https://github.com/DEFRA/defra-docker-node/actions).
+Scans are performed using the Anchore Engine GitHub Actions using the policy file [anchore-policy.json](anchore-policy.json).
+Details on the policy configuration and exclusions can be found in [POLICY_CONFIGURATION.md](POLICY_CONFIGURATION.md).
 
 Note that the scan is performed using version 1 of the [Anchore Scan Action](https://github.com/anchore/scan-action/tree/version1) as version 2 does not yet support policy files.
 
-There are two solutions to address an image vulnerability: patch the Dockerfile to upgrade the vulnerable library, or to add the vulnerability to the exclusion list if it is not deemed exploitable.
+If the Anchore scan finds a vulnerability the scan will fail and a report will be stored as an artifact against the failed scan action against the GitHib [Action](https://github.com/DEFRA/defra-docker-node/actions).
+
+There are two solutions to address an image vulnerability: patch the Dockerfile to upgrade the vulnerable library, or add the vulnerability to the exclusion list if it is not deemed exploitable.
 
 ### Adding a vulnerability to the exclusion list
 
-Generally speaking the only vulnerabilities that are excluded are binaries used by the npm command line tool, as these are not exploitable in a running container, and are not straight forward to update.
+Generally speaking the only vulnerabilities that are excluded are binaries used by the `npm` command line tool, as these are not exploitable in a running container, and are difficult to update.
 
 The scan output on the GitHub Action log will provide details of the gate and trigger that has failed, along with the CVE ID of the vulnerability.
 
@@ -106,6 +109,20 @@ Note that the `>` symbol will install versions `1.1.1` or greater, so acts like 
 The command should be placed after the `tini` installation, with a leading `&&`. The line above correctly updated would be:
 ```
 RUN apk update && apk add --no-cache tini  && apk add --no-cache 'libssl1.1>1.1.1' && apk add ca-certificates && rm -rf /var/cache/apk/*
+```
+
+Note that the `'` quotes around the package name and version are important, and leaving them out can lead to unintended behaviour.
+
+### Running an Anchore Engine scan locally
+
+First build the production image locally with a known tag as described above, i.e.
+```
+docker build --no-cache --tag defra-node:latest --target=production .
+```
+
+Scan the tagged image, i.e. `defra-node:latest`, using the Anchore hosted script and the policy file `anchore-policy.json`:
+```
+curl -s https://ci-tools.anchore.io/inline_scan-v0.8.2 | bash -s -- -r -f -b ./anchore-policy.json defra-node:latest
 ```
 
 

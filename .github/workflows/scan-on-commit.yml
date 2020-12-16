@@ -6,14 +6,11 @@ on:
 
 jobs:
   anchore-scan:
-    env:
-      NODE_VERSION: 14.15.0
-      ALPINE_VERSION: alpine3.12
-      DEFRA_VERSION: 1.2.3
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
+      - name: Set env vars
+        run:  cat scan.env >> $GITHUB_ENV
       - name: Build the Docker image
         run: docker build . --file Dockerfile --no-cache --build-arg DEFRA_VERSION=$DEFRA_VERSION --build-arg BASE_VERSION=$NODE_VERSION-$ALPINE_VERSION --tag defradigital/node:$DEFRA_VERSION-node$NODE_VERSION
       - uses: anchore/scan-action@v1
