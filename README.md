@@ -24,7 +24,7 @@ To build the images locally, run:
 ```
 docker build . --no-cache --target <target> .
 ```
-(where <target> is either `development` or `production`).
+(where `<target>` is either `development` or `production`).
 
 This will build an image using the default `BASE_VERSION` as set in the [Dockerfile](Dockerfile).
 
@@ -50,14 +50,14 @@ This image uses the [Defra Docker Shared Jenkins library](https://github.com/DEF
 
 ## Image vulnerability scanning
 
-The repository runs a nightly scan of the latest parent image, and will scan images on push to a branch.
+The repository runs a vulnerability scan of the latest parent image nightly, and the 'work in progress' image on push to a branch.
 
-Scans are performed using the Anchore Engine GitHub Actions using the policy file [anchore-policy.json](anchore-policy.json).
+Scans are performed using the Anchore Engine GitHub Action using the policy file [anchore-policy.json](anchore-policy.json).
 Details on the policy configuration and exclusions can be found in [POLICY_CONFIGURATION.md](POLICY_CONFIGURATION.md).
 
 Note that the scan is performed using version 1 of the [Anchore Scan Action](https://github.com/anchore/scan-action/tree/version1) as version 2 does not yet support policy files.
 
-If the Anchore scan finds a vulnerability the scan will fail and a report will be stored as an artifact against the failed scan action against the GitHib [Action](https://github.com/DEFRA/defra-docker-node/actions).
+If the Anchore scan finds a vulnerability the scan will fail and a report will be stored as an artifact against the failed  GitHub [Action](https://github.com/DEFRA/defra-docker-node/actions).
 
 There are two solutions to address an image vulnerability: patch the Dockerfile to upgrade the vulnerable library, or add the vulnerability to the exclusion list if it is not deemed exploitable.
 
@@ -67,7 +67,7 @@ Generally speaking the only vulnerabilities that are excluded are binaries used 
 
 The scan output on the GitHub Action log will provide details of the gate and trigger that has failed, along with the CVE ID of the vulnerability.
 
-The vulnerability report will also provide the CVE ID and package name in a file with the suffix `-vuln.json`, available in the Github Action artifact.
+The vulnerability report will also provide the CVE ID and package name in a file with the suffix `-vuln.json`, available in the failed Github Action's artifact.
 
 To exclude the vulnerability add an item to the `anchore-policy.json`'s `whitelists` section.
 
