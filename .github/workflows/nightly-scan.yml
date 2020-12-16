@@ -10,11 +10,12 @@ jobs:
 
       steps:
         - uses: actions/checkout@v2
-
-        - name: Scan node image
+        - name: Set scan environment variables
+        run:  cat scan.env >> $GITHUB_ENV
+        - name: Scan node docker image
           uses: anchore/scan-action@v1
           with:
-            image-reference: "defradigital/node:1.2.2-node14.15.0"
+            image-reference: defradigital/node:${{ env.DEFRA_VERSION }}-node${{ env.NODE_VERSION }}
             fail-build: true
             custom-policy-path: ./anchore-policy.json
             include-app-packages: true
