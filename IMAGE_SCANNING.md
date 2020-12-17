@@ -1,10 +1,9 @@
 
 #  Image vulnerability scanning
 
-## Overview
 The repository runs a vulnerability scan of the latest Docker hub parent image nightly, and the 'work in progress' image on push to a branch via the GitHub actions workflows [nightly-scan.yml](.github/workflows/nightly-scan.yml) and [scan-on-commit.yml](.github/workflows/scan-on-commit.yml) respectively.
 
-Scheduled actions only run on the `master` repository branch so will only run once, regardless of the number of branches.
+Scheduled actions only run on the `master` repository branch so will run once, regardless of the number of branches.
 
 Both workflows read settings from the file [scan.env](scan.env) to ensure the same Node.js, Alpine, and Defra versions are used during the image scan.
 
@@ -51,14 +50,14 @@ Any exclusions should be recorded in the [POLICY_CONFIGURATION.md](POLICY_CONFIG
 
 If the vulnerability is for an Alpine package, check the CVE report to see if the issue is fixed in a newer version of the package. If so, check if the patched version of the package is available in [Alpine Linux](https://pkgs.alpinelinux.org/packages).
 
-The Dockerfile will need to be updated to install the specific version of the package.
+The Dockerfile will need to be updated to install the fixed version of the package.
 There is already a line present in the [Dockerfile](./Dockerfile) that installs Alpine packages. The line, slightly simplified, is show below:
 
 ```
 RUN apk update && apk add --no-cache tini && apk add ca-certificates && rm -rf /var/cache/apk/*
 ``` 
 
-To install a specific version of a package you need to know the name and minimum version of a package. The syntax to install `libssl` at version `1.1.1` or greater would be:
+To install the new package you need to supply the name and minimum version to the `apk add` command. The syntax to install `libssl` at version `1.1.1` or greater would be:
 
 ```
 apk add --no-cache 'libssl1.1>1.1.1'
@@ -71,6 +70,8 @@ The command should be placed after the `tini` installation, with a leading `&&`.
 RUN apk update && apk add --no-cache tini  && apk add --no-cache 'libssl1.1>1.1.1' && apk add ca-certificates && rm -rf /var/cache/apk/*
 ```
 
+Further details on `apk` syntax can be found in the [Alpine package management documentation](https://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management).
+
 ## Running an Anchore Engine scan locally
 
 First build the production image locally with a known tag as described ine the [README.md](README.md), i.e.
@@ -82,3 +83,5 @@ Scan the tagged image, i.e. `defra-node:latest`, using the Anchore hosted script
 ```
 curl -s https://ci-tools.anchore.io/inline_scan-v0.8.2 | bash -s -- -r -f -b ./anchore-policy.json defra-node:latest
 ```
+
+Full documentation on the inline scanning tool can be found at https://github.com/anchore/ci-tools.
