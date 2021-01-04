@@ -7,7 +7,7 @@ The following table lists the versions of node available, and the parent node im
 | Node version  | Parent image       |
 | ------------- | -----------------  |
 | 12.18.3       | 12.18.3-alpine3.12 |
-| 14.15.0       | 14.15.0-alpine3.12|
+| 14.15.3       | 14.15.3-alpine3.12 |
 
 Two parent images are created for each version:
 
@@ -50,7 +50,7 @@ This image uses the [Defra Docker Shared Jenkins library](https://github.com/DEF
 
 ## Image vulnerability scanning
 
-The repository runs a nightly Anchore Engine scan, and will scan images on push. For more details, see [Image Scanning](IMAGE_SCANNING.md)
+The repository runs a nightly Anchore Engine scan, and will scan images on push. For more details see [Image Scanning](IMAGE_SCANNING.md)
 
 ## Licence
 
