@@ -50,7 +50,12 @@ This image uses the [Defra Docker Shared Jenkins library](https://github.com/DEF
 
 ## Image vulnerability scanning
 
-The repository runs a nightly Anchore Engine scan, and will scan images on push. For more details see [Image Scanning](IMAGE_SCANNING.md)
+
+A GitHub Action runs a nightly Anchore Engine scan of the image published to Docker, and will build and scan pre-release images on push. 
+
+This ensures Defra services that use the parent images are starting from a known secure foundation, and can limit patching to only newly added libraries.
+
+For more details see [Image Scanning](IMAGE_SCANNING.md)
 
 ## Licence
 
