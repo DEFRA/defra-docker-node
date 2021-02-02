@@ -74,7 +74,7 @@ Further details on `apk` syntax can be found in the [Alpine package management d
 
 ## Running an Anchore Engine scan locally
 
-First build the production image locally with a known tag as described ine the [README.md](README.md), i.e.
+First build the production image locally with a known tag as described in the [README.md](README.md), i.e.
 ```
 docker build --no-cache --tag defra-node:latest --target=production .
 ```
