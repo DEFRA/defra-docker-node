@@ -4,10 +4,10 @@ This repository contains Node parent Docker image source code for Defra.
 
 The following table lists the versions of node available, and the parent node image they are based on:
 
-| Node version  | Parent image      |
-| ------------- | ----------------- |
-| 8.17.0        | 8.17.0-alpine     |
-| 12.18.3       | 12.18.3-alpine3.12|
+| Node version  | Parent image       |
+| ------------- | -----------------  |
+| 12.18.3       | 12.18.3-alpine3.12 |
+| 14.15.3       | 14.15.3-alpine3.12 |
 
 Two parent images are created for each version:
 
@@ -22,9 +22,9 @@ It is recommended that services use [multi-stage builds](https://docs.docker.com
 
 To build the images locally, run:
 ```
-docker build --no-cache --target <target> .
+docker build . --no-cache --target <target> .
 ```
-(where <target> is either `development` or `production`).
+(where `<target>` is either `development` or `production`).
 
 This will build an image using the default `BASE_VERSION` as set in the [Dockerfile](Dockerfile).
 
@@ -47,6 +47,15 @@ Images should be tagged according to the Dockerfile version and the version of N
 On commit to master Jenkins will build both `node` and `node-development` images and push them to the `defradigital` organisation in GitHub if the tag specified in the `version` map within the `./Jenkinsfile` does not already exist in Docker Hub.
 
 This image uses the [Defra Docker Shared Jenkins library](https://github.com/DEFRA/defra-docker-jenkins) to abstract pipeline complexity from repository.  See repository for further usage details.
+
+## Image vulnerability scanning
+
+
+A GitHub Action runs a nightly Anchore Engine scan of the image published to Docker, and will build and scan pre-release images on push. At present only the latest Node.js 14 image is scanned. Scanning of the Node.js 12 image will be added in the future.
+
+This ensures Defra services that use the parent images are starting from a known secure foundation, and can limit patching to only newly added libraries.
+
+For more details see [Image Scanning](IMAGE_SCANNING.md)
 
 ## Licence
 

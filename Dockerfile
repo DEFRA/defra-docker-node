@@ -1,6 +1,6 @@
 # Set default values for build arguments
-ARG DEFRA_VERSION=1.2.2
-ARG BASE_VERSION=14.15.0-alpine3.12
+ARG DEFRA_VERSION=1.2.3
+ARG BASE_VERSION=14.15.3-alpine3.12
 
 FROM node:$BASE_VERSION AS production
 
@@ -16,7 +16,7 @@ ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/internal-ca.crt
 
 # We need a basic init process to handle signals and reap zombie processes, tini handles that
 # Install Internal CA certificate
-RUN apk update && apk add --no-cache tini && apk add ca-certificates && rm -rf /var/cache/apk/*
+RUN apk update && apk add --no-cache tini && apk add --no-cache 'libssl1.1>1.1.1i' && apk add --no-cache 'libcrypto1.1>1.1.1i' && apk add ca-certificates && rm -rf /var/cache/apk/*
 COPY certificates/internal-ca.crt /usr/local/share/ca-certificates/internal-ca.crt
 RUN chmod 644 /usr/local/share/ca-certificates/internal-ca.crt && update-ca-certificates
 
@@ -43,7 +43,7 @@ LABEL uk.gov.defra.node.repository=defradigital/node-development
 USER root
 RUN apk update && \
     apk add --no-cache git && \
-    apk add --no-cache --virtual .gyp python2=~2.7 make g++=~9.3
+    apk add --no-cache --virtual .gyp 'python2=~2.7' make 'g++=~9.3'
 # Pact dependencies are not included in Alpine image for contract testing
 RUN apk add --no-cache bash wget \
     && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
