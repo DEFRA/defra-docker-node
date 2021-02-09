@@ -26,7 +26,7 @@ jobs:
     strategy:
       matrix:
         target: ["development", "production"]
-        include: ${{fromJSON(needs.get-matrix-values.outputs.include)}}
+        image: ${{fromJSON(needs.get-matrix-values.outputs.include)}}
     steps:
       - uses: actions/checkout@v2
       - id: setEnv
@@ -45,9 +45,9 @@ jobs:
           fi
           
           echo "::set-output name=dockerRepoName::$DOCKER_REPO_NAME"
-          echo "::set-output name=fullImageName::$DOCKER_REPO_NAME:$DEFRA_VERSION-node${{matrix.runTimeVersion}}"
+          echo "::set-output name=fullImageName::$DOCKER_REPO_NAME:$DEFRA_VERSION-node${{matrix.image.runTimeVersion}}"
 
-          if [ ${{matrix.latest}} = true ]
+          if [ ${{matrix.image.latest}} = true ]
           then 
             echo "::set-output name=latestTag::--tag $DOCKER_REPO_NAME:latest"
           else
@@ -59,7 +59,7 @@ jobs:
           docker build . --file Dockerfile --no-cache \
           --target=${{matrix.target}} \
           --build-arg DEFRA_VERSION=$DEFRA_VERSION \
-          --build-arg BASE_VERSION=${{matrix.runtimeVersion}}-$ALPINE_VERSION  \
+          --build-arg BASE_VERSION=${{matrix.image.runtimeVersion}}-$ALPINE_VERSION  \
           --tag ${{steps.setImageDetails.outputs.fullImageName}} \
           ${{steps.setImageDetails.outputs.latestTag}}
           docker images
@@ -85,7 +85,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         run: |
           docker image push ${{steps.setImageDetails.outputs.fullImageName}}
-          if [ ${{matrix.latest}} = true ]
+          if [ ${{matrix.image.latest}} = true ]
           then 
             docker image push ${{steps.setImageDetails.outputs.dockerRepoName}}:latest
           fi
@@ -94,5 +94,5 @@ jobs:
         if: ${{ failure() && matrix.target == 'production' }}
         uses: actions/upload-artifact@v2
         with:
-          name: anchore-reports-node-${{ matrix.runtimeVersion }}
+          name: anchore-reports-node-${{ matrix.image.runtimeVersion }}
           path: anchore-reports
