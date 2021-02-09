@@ -3,8 +3,8 @@
 import uk.gov.defra.ImageMap
 
 ImageMap[] imageMaps = [
-  [version: '12.18.3', tag: '12.18.3-alpine3.12', latest: false],
-  [version: '14.15.3', tag: '14.15.3-alpine3.12', latest: true]
+  [version: '12.20.1', tag: '12.20.1-alpine3.12', latest: false],
+  [version: '14.15.4', tag: '14.15.4-alpine3.12', latest: true]
 ]
 
 buildParentImage imageName: 'node',
