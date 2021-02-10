@@ -1,8 +1,10 @@
 name: NIGHTLY-SCAN
 
 on:
-  schedule:
-    - cron: '0 1 * * *'
+  push:
+    branches: [ 'none' ]
+  # schedule:
+  #   - cron: '0 1 * * *'
 
 jobs:
   get-matrix-values:
