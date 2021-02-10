@@ -26,7 +26,7 @@ jobs:
     needs:  get-matrix-values
     strategy:
       matrix:
-        image: ${{fromJSON(needs.get-matrix-values.outputs.include)}}
+        image: ${{fromJSON(needs.get-matrix-values.outputs.image)}}
     steps:
       - uses: actions/checkout@v2
       - name: Set job environment variables
