@@ -5,7 +5,7 @@ The repository runs a vulnerability scan of the latest Docker hub parent image n
 
 Scheduled actions only run on the `master` repository branch so will run once, regardless of the number of branches.
 
-Both workflows read settings from the file [scan.env](scan.env) to ensure the same Node.js, Alpine, and Defra versions are used during the image scan.
+Both workflows read settings from the file [JOB.env](JOB.env) to ensure the same Node.js, Alpine, and Defra versions are used during the image scan.
 
 Scans are performed using the Anchore Engine GitHub Action using the policy file [anchore-policy.json](anchore-policy.json).
 Details on the policy configuration and exclusions can be found in [POLICY_CONFIGURATION.md](POLICY_CONFIGURATION.md).
