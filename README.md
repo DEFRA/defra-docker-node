@@ -44,9 +44,11 @@ Images should be tagged according to the Dockerfile version and the version of N
 
 ## CI/CD
 
-On commit to master Jenkins will build both `node` and `node-development` images and push them to the `defradigital` organisation in GitHub if the tag specified in the `version` map within the `./Jenkinsfile` does not already exist in Docker Hub.
+On commit GitHub Actions will build both `node` and `node-development` images for the Node.js versions listed in the [image-matrix.json](image-matrix.json) file, and perform a vulnerability scan, as described below.
 
-This image uses the [Defra Docker Shared Jenkins library](https://github.com/DEFRA/defra-docker-jenkins) to abstract pipeline complexity from repository.  See repository for further usage details.
+In addition a commit to the master branch will push the images to the [defradigital](https://hub.docker.com/u/defradigital) organisation in Docker Hub using the version tag specified in the [JOB.env](JOB.env) file. This version tag is expected to be manually updated on each release.
+
+The Node.js version marked as `latest` in the [image-matrix.json](image-matrix.json) will be tagged as the `latest` image in Docker Hub.
 
 ## Image vulnerability scanning
 

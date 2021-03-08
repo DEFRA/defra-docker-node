@@ -5,16 +5,34 @@ on:
     - cron: '0 1 * * *'
 
 jobs:
-  anchore-scan:
+  get-matrix-values:
     runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.set-var.outputs.image }}
     steps:
       - uses: actions/checkout@v2
-      - name: Set scan environment variables
-        run:  cat scan.env >> $GITHUB_ENV
-      - name: Scan node docker image
+      - id: set-var
+        run: |
+          content=`cat ./image-matrix.json`
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
+          echo "::set-output name=image::$content"
+  
+  anchore-scan:
+    runs-on: ubuntu-latest
+    needs:  get-matrix-values
+    strategy:
+      matrix:
+        image: ${{fromJSON(needs.get-matrix-values.outputs.image)}}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set job environment variables
+        run:  cat JOB.env >> $GITHUB_ENV
+      - name: Scan Node.js docker image
         uses: anchore/scan-action@v1
         with:
-          image-reference: defradigital/node:${{ env.DEFRA_VERSION }}-node${{ env.NODE_VERSION }}
+          image-reference: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-node${{matrix.image.runTimeVersion}}
           fail-build: true
           custom-policy-path: ./anchore-policy.json
           include-app-packages: true
@@ -23,5 +41,5 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
         with:
-          name: anchore-reports-node14
+          name: anchore-reports-node-${{ matrix.image.runtimeVersion }}
           path: anchore-reports

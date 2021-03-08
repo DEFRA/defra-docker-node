@@ -1,0 +1,98 @@
+name: BUILD-SCAN-PUSH
+
+on:
+  push:
+    branches: [ '*' ]
+
+jobs:
+
+  get-matrix-values:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.set-var.outputs.image }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-var
+        run: |
+          content=`cat ./image-matrix.json`
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
+          echo "::set-output name=image::$content"
+  
+  build-images:
+    runs-on: ubuntu-latest
+    needs:  get-matrix-values
+    strategy:
+      matrix:
+        target: ["development", "production"]
+        image: ${{fromJSON(needs.get-matrix-values.outputs.image)}}
+    steps:
+      - uses: actions/checkout@v2
+      - id: setEnv
+        name: Set Job env vars 
+        run: |
+          cat JOB.env >> $GITHUB_ENV
+
+      - id: setImageDetails
+        name: Set image name and latest tag
+        run: |
+          if [ ${{matrix.target}} = "production" ]
+          then 
+            DOCKER_REPO_NAME="defradigital/$IMAGE_NAME"
+          else
+            DOCKER_REPO_NAME="defradigital/$IMAGE_NAME-${{matrix.target}}"
+          fi
+          
+          echo "::set-output name=dockerRepoName::$DOCKER_REPO_NAME"
+          echo "::set-output name=fullImageName::$DOCKER_REPO_NAME:$DEFRA_VERSION-node${{matrix.image.runTimeVersion}}"
+
+          if [ ${{matrix.image.latest}} = true ]
+          then 
+            echo "::set-output name=latestTag::--tag $DOCKER_REPO_NAME:latest"
+          else
+            echo "::set-output name=latestTag:: "
+          fi
+
+      - name: Build the Docker image
+        run: |
+          docker build . --file Dockerfile --no-cache \
+          --target=${{matrix.target}} \
+          --build-arg DEFRA_VERSION=$DEFRA_VERSION \
+          --build-arg BASE_VERSION=${{matrix.image.runtimeVersion}}-$ALPINE_VERSION  \
+          --tag ${{steps.setImageDetails.outputs.fullImageName}} \
+          ${{steps.setImageDetails.outputs.latestTag}}
+          docker images
+
+      - uses: anchore/scan-action@v1
+        name: run anchore engine scan
+        if: ${{ matrix.target == 'production' }}
+        with:
+          image-reference: ${{steps.setImageDetails.outputs.fullImageName}}
+          fail-build: true
+          custom-policy-path: ./anchore-policy.json
+          include-app-packages: true
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        if: github.ref == 'refs/heads/master'
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - id: pushImage
+        name: push docker image
+        if: github.ref == 'refs/heads/master'
+        run: |
+          docker image push ${{steps.setImageDetails.outputs.fullImageName}}
+          if [ ${{matrix.image.latest}} = true ]
+          then 
+            docker image push ${{steps.setImageDetails.outputs.dockerRepoName}}:latest
+          fi
+
+      - name: Archive anchore report
+        if: ${{ failure() && matrix.target == 'production' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: anchore-reports-node-${{ matrix.image.runtimeVersion }}
+          path: anchore-reports
