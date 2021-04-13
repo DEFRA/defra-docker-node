@@ -30,13 +30,10 @@ jobs:
       - name: Set job environment variables
         run:  cat JOB.env >> $GITHUB_ENV
       - name: Scan Node.js docker image
-        uses: anchore/scan-action@v1
-        with:
-          image-reference: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-node${{matrix.image.runTimeVersion}}
-          fail-build: true
-          custom-policy-path: ./anchore-policy.json
-          include-app-packages: true
-
+        run: |
+          curl -s https://ci-tools.anchore.io/inline_scan-v$ANCHORE_SCAN_VERSION | \
+          bash -s -- -r -f -p -b ./anchore-policy.json defradigital/$IMAGE_NAME:$DEFRA_VERSION-node${{matrix.image.runTimeVersion}}
+      
       - name: Archive anchore report
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
