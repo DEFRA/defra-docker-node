@@ -64,14 +64,11 @@ jobs:
           ${{steps.setImageDetails.outputs.latestTag}}
           docker images
 
-      - uses: anchore/scan-action@v1
-        name: run anchore engine scan
+      - name: run anchore engine scan
         if: ${{ matrix.target == 'production' }}
-        with:
-          image-reference: ${{steps.setImageDetails.outputs.fullImageName}}
-          fail-build: true
-          custom-policy-path: ./anchore-policy.json
-          include-app-packages: true
+        run: |
+          curl -s https://ci-tools.anchore.io/inline_scan-v$ANCHORE_SCAN_VERSION | \
+          bash -s -- -r -f -b ./anchore-policy.json ${{steps.setImageDetails.outputs.fullImageName}}
 
       - name: Login to DockerHub
         uses: docker/login-action@v1

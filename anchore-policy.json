@@ -21,8 +21,7 @@
       "name": "NPM binaries Whitelist",
       "version": "1_0",
       "items": [
-        { "id": "item1", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "CVE-2020-7788+ini" },
-        { "id": "item2", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "CVE-2020-7774+y18n" }
+        { "id": "item1", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "GHSA-vx3p-948g-6vhq+ssri" }
       ]
     }
   ],

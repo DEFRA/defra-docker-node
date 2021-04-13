@@ -7,10 +7,8 @@ Scheduled actions only run on the `master` repository branch so will run once, r
 
 Both workflows read settings from the file [JOB.env](JOB.env) to ensure the same Node.js, Alpine, and Defra versions are used during the image scan.
 
-Scans are performed using the Anchore Engine GitHub Action using the policy file [anchore-policy.json](anchore-policy.json).
+Scans are performed by the [Anchore Engine CLI Tools](https://github.com/anchore/ci-tools) inline script using the policy file [anchore-policy.json](anchore-policy.json).
 Details on the policy configuration and exclusions can be found in [POLICY_CONFIGURATION.md](POLICY_CONFIGURATION.md).
-
-Note that the scan is performed using version 1 of the [Anchore Scan Action](https://github.com/anchore/scan-action/tree/version1) as version 2 does not yet support policy files.
 
 ## Addressing vulnerabilities
 
@@ -69,6 +67,7 @@ The command should be placed after the `tini` installation, with a leading `&&`.
 ```
 RUN apk update && apk add --no-cache tini  && apk add --no-cache 'libssl1.1>1.1.1' && apk add ca-certificates && rm -rf /var/cache/apk/*
 ```
+Sometimes a patch version contains letters, i.e. `1.1.1j-r0`, these should be matched with a `>1.1.1` where possible, rather than tying to a specific version with `=1.1.1j-r0`.
 
 Further details on `apk` syntax can be found in the [Alpine package management documentation](https://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management).
 
@@ -81,7 +80,7 @@ docker build --no-cache --tag defra-node:latest --target=production .
 
 Scan the tagged image, i.e. `defra-node:latest`, using the Anchore hosted script and the policy file `anchore-policy.json`:
 ```
-curl -s https://ci-tools.anchore.io/inline_scan-v0.8.2 | bash -s -- -r -f -b ./anchore-policy.json defra-node:latest
+curl -s https://ci-tools.anchore.io/inline_scan-v0.9.3 | bash -s -- -r -f -b ./anchore-policy.json defra-node:latest
 ```
 
 Full documentation on the inline scanning tool can be found at https://github.com/anchore/ci-tools.
