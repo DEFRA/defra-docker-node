@@ -8,3 +8,4 @@ The following issues have been added to the policies exclusion list
 | ------------- | -------  |----------| ------------- | -----------------  |
 | [CVE-2021-27290 (github)](https://github.com/advisories/GHSA-vx3p-948g-6vhq) | NPM | [ssri](https://github.com/zkat/ssri) | binary only used by npm installation for npm command line activities, i.e. npm install, and is not used by running applications | 14/04/2021 |
 | [CVE-2021-27290 (NIST)](https://nvd.nist.gov/vuln/detail/CVE-2021-27290) | NPM | [ssri](https://github.com/zkat/ssri) | same issue as above detected as different reports | 14/04/2021 |
+| [CVE-2021-23362 (github)](https://github.com/advisories/GHSA-43f8-2h32-f4cj) | NPM | [hosted-git-info](https://github.com/npm/hosted-git-info) | binary only used by npm installation for npm command line activities, i.e. npm install, and is not used by running applications | 10/05/2021 |
