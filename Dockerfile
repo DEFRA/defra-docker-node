@@ -1,6 +1,6 @@
 # Set default values for build arguments
-ARG DEFRA_VERSION=1.2.4
-ARG BASE_VERSION=14.16.1-alpine3.12
+ARG DEFRA_VERSION=1.2.6
+ARG BASE_VERSION=14.17.4-alpine3.14
 
 FROM node:$BASE_VERSION AS production
 
@@ -43,7 +43,7 @@ LABEL uk.gov.defra.node.repository=defradigital/node-development
 USER root
 RUN apk update && \
     apk add --no-cache git && \
-    apk add --no-cache --virtual .gyp 'python2=~2.7' make 'g++=~9.3'
+    apk add --no-cache --virtual .gyp 'python2=~2.7' make 'g++=~10.3'
 # Pact dependencies are not included in Alpine image for contract testing
 RUN apk add --no-cache bash wget \
     && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \

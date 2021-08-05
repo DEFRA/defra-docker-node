@@ -20,11 +20,7 @@
       "id": "whitelist1",
       "name": "NPM binaries Whitelist",
       "version": "1_0",
-      "items": [
-        { "id": "item1", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "GHSA-vx3p-948g-6vhq+ssri" },
-        { "id": "item2", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "CVE-2021-27290+ssri" },
-        { "id": "item3", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "GHSA-43f8-2h32-f4cj+hosted-git-info" }
-      ]
+      "items": []
     }
   ],
   "policies": [
