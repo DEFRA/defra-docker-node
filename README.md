@@ -48,7 +48,7 @@ On commit GitHub Actions will build both `node` and `node-development` images fo
 
 In addition a commit to the master branch will push the images to the [defradigital](https://hub.docker.com/u/defradigital) organisation in Docker Hub using the version tag specified in the [JOB.env](JOB.env) file. This version tag is expected to be manually updated on each release.
 
-The Node.js version marked as `latest` in the [image-matrix.json](image-matrix.json) will be tagged as the `latest` image in Docker Hub.
+In addition to the version, the images will also be tagged with the contents of the `tags` array from [image-matrix.json](image-matrix.json) when pushed to Docker Hub.
 
 ## Image vulnerability scanning
 
