@@ -2,7 +2,7 @@ name: BUILD-SCAN-PUSH
 
 on:
   push:
-    branches: [ '*' ]
+    branches: [ '**' ]
 
 jobs:
 
