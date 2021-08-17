@@ -70,6 +70,15 @@ jobs:
           curl -s https://ci-tools.anchore.io/inline_scan-v$ANCHORE_SCAN_VERSION | \
           bash -s -- -r -f -b ./anchore-policy.json ${{steps.setImageDetails.outputs.fullImageName}}
 
+      - name: Tag image
+        run: |
+          echo "Tags are ${{ join(matrix.image.tags, ' ') }}"
+          for TAG in ${{ join(matrix.image.tags, ' ') }}
+          do
+            echo "creating tag ${{steps.setImageDetails.outputs.dockerRepoName}}:$TAG"
+            docker image tag ${{steps.setImageDetails.outputs.fullImageName}} ${{steps.setImageDetails.outputs.dockerRepoName}}:$TAG
+          done
+
       - name: Login to DockerHub
         uses: docker/login-action@v1
         if: github.ref == 'refs/heads/master'
@@ -82,10 +91,10 @@ jobs:
         if: github.ref == 'refs/heads/master'
         run: |
           docker image push ${{steps.setImageDetails.outputs.fullImageName}}
-          if [ ${{matrix.image.latest}} = true ]
-          then 
-            docker image push ${{steps.setImageDetails.outputs.dockerRepoName}}:latest
-          fi
+          for TAG in ${{ join(matrix.image.tags, ' ') }}
+          do
+            docker image push ${{steps.setImageDetails.outputs.dockerRepoName}}:$TAG
+          done
 
       - name: Archive anchore report
         if: ${{ failure() && matrix.target == 'production' }}
