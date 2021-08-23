@@ -6,3 +6,4 @@ The following issues have been added to the policies exclusion list
 
 | CVE Report    |Type      | Component | Reason       | Date |
 | ------------- | -------  |----------| ------------- | -----------------  |
+|[CVE-2021-23343]("https://github.com/advisories/GHSA-hj48-42vr-x3v9")| NPM | [path-parse](https://github.com/jbgutierrez/path-parse) | Binary only used by `npm` command line and is not exploitable in a production image | 23/08/2021 |
