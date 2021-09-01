@@ -20,9 +20,7 @@
       "id": "whitelist1",
       "name": "NPM binaries Whitelist",
       "version": "1_0",
-      "items": [
-        { "id": "item1", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "GHSA-hj48-42vr-x3v9+path-parse" }
-      ]
+      "items": []
     }
   ],
   "policies": [
