@@ -20,7 +20,9 @@
       "id": "whitelist1",
       "name": "NPM binaries Whitelist",
       "version": "1_0",
-      "items": []
+      "items": [
+        { "id": "item1", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "GHSA-93q8-gq69-wqmw+ansi-regex" }
+      ]
     }
   ],
   "policies": [
