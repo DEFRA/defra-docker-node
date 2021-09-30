@@ -1,4 +1,4 @@
  [
     {"runtimeVersion": "12.22.6", "tags": ["latest-12"]},
-    {"runtimeVersion": "14.17.6", "tags": ["latest", "latest-14"]}
+    {"runtimeVersion": "14.18.0", "tags": ["latest", "latest-14"]}
 ]
