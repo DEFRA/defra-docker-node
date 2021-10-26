@@ -6,8 +6,9 @@ The following table lists the versions of node available, and the parent node im
 
 | Node version  | Parent image       |
 | ------------- | -----------------  |
-| 12.22.6       | 12.22.6-alpine3.14 |
-| 14.18.0       | 14.18.0-alpine3.14 |
+| 12.22.7       | 12.22.7-alpine3.14 |
+| 14.18.1       | 14.18.1-alpine3.14 |
+| 16.12.0       | 16.12.0-alpine3.14 |
 
 Two parent images are created for each version:
 
