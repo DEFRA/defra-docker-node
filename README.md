@@ -60,6 +60,14 @@ This ensures Defra services that use the parent images are starting from a known
 
 For more details see [Image Scanning](IMAGE_SCANNING.md)
 
+## Convenience script
+
+A simple convenience script [bump](./bump) is provided to substitute version in the files `Dockerfile`, `README.md`, and `image-matrix.json`. 
+
+The 'from' and 'to' values to substitute are separated by a colon, and multiple arguments must be separated by a space.
+
+i.e. `./bump 16.13.0:16.13.1 14.18.1:14.18.2` will replace all instances of `16.13.0` with `16.13.1` and all instances of `14.18.1` with `14.18.2`.
+
 ## Licence
 
 THIS INFORMATION IS LICENSED UNDER THE CONDITIONS OF THE OPEN GOVERNMENT LICENCE found at:

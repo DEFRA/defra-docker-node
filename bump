@@ -1,5 +1,6 @@
+ #!/bin/bash
 IFS=':'
-if [$1 == ""]; then
+if [ "$1" == "" ]; then
   echo "usage:"
   echo "  ./bump a1:a2 b1:b2 ..."
   echo "i.e."
@@ -11,6 +12,5 @@ else
         matcher=s/$cur/$new/g
         echo "Updating $cur to $new"
         sed -i -e $matcher Dockerfile README.md image-matrix.json
-
     done
 fi
