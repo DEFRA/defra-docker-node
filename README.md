@@ -7,8 +7,8 @@ The following table lists the versions of node available, and the parent node im
 | Node version  | Parent image       |
 | ------------- | -----------------  |
 | 12.22.7       | 12.22.7-alpine3.14 |
-| 14.18.1       | 14.18.1-alpine3.14 |
-| 16.13.0       | 16.13.0-alpine3.14 |
+| 14.18.2       | 14.18.2-alpine3.14 |
+| 16.13.1       | 16.13.1-alpine3.14 |
 
 Two parent images are created for each version:
 
@@ -59,6 +59,14 @@ A GitHub Action runs a nightly Anchore Engine scan of the image published to Doc
 This ensures Defra services that use the parent images are starting from a known secure foundation, and can limit patching to only newly added libraries.
 
 For more details see [Image Scanning](IMAGE_SCANNING.md)
+
+## Convenience script
+
+A simple convenience script [bump](./bump) is provided to substitute version in the files `Dockerfile`, `README.md`, and `image-matrix.json`. 
+
+The 'from' and 'to' values to substitute are separated by a colon, and multiple arguments must be separated by a space.
+
+i.e. `./bump 16.13.0:16.13.1 14.18.1:14.18.2` will replace all instances of `16.13.0` with `16.13.1` and all instances of `14.18.1` with `14.18.2`.
 
 ## Licence
 

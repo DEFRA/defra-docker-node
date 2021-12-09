@@ -6,4 +6,5 @@ The following issues have been added to the policies exclusion list
 
 | CVE Report    |Type      | Component | Reason       | Date |
 | ------------- | -------  |----------| ------------- | -----------------  |
-|[CVE-2021-3807](https://github.com/advisories/GHSA-93q8-gq69-wqmw)| NPM | [ansi-regex](https://github.com/chalk/ansi-regex) | Present in Node.js `12.22.6`, not `14.18.0`. Binary only used by `npm` command line and is not exploitable in a production image | 28/09/2021 |
+|[CVE-2021-3807](https://github.com/advisories/GHSA-93q8-gq69-wqmw)| NPM | [ansi-regex](https://github.com/chalk/ansi-regex) | Binary only used by `npm` command line and is not exploitable in a production image | 28/09/2021 |
+|[CVE-2021-3918](https://github.com/advisories/GHSA-896r-f27r-55mw)| NPM | [json-schema](https://github.com/kriszyp/json-schema) | Binary only used by `npm` command line and is not exploitable in a production image | 07/12/2021 |

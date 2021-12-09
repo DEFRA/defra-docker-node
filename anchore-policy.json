@@ -21,7 +21,8 @@
       "name": "NPM binaries Whitelist",
       "version": "1_0",
       "items": [
-        { "id": "item1", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "GHSA-93q8-gq69-wqmw+ansi-regex" }
+        { "id": "item1", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "GHSA-93q8-gq69-wqmw+ansi-regex" },
+        { "id": "item2", "gate": "vulnerabilities", "trigger": "package", "trigger_id": "GHSA-896r-f27r-55mw+json-schema" }
       ]
     }
   ],
