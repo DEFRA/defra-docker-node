@@ -7,10 +7,11 @@ ignore:
     package:
       type: npm
       name: ansi-regex
-  # - vulnerability:  CVE-2021-43616
-  #   package:
-  #     name: npm
-# node.js 14 issues
+  - vulnerability:  CVE-2021-43616
+    package:
+      type: npm
+      name: npm
+# node.js 12/14 issues
   - vulnerability: CVE-2020-8116
     package:
       type: npm
