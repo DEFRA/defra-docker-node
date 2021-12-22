@@ -64,11 +64,12 @@ jobs:
           ${{steps.setImageDetails.outputs.latestTag}}
           docker images
 
-      - name: run anchore engine scan
+      - name: run anchore grype scan
+        id: scan
         if: ${{ matrix.target == 'production' }}
-        run: |
-          curl -s https://ci-tools.anchore.io/inline_scan-v$ANCHORE_SCAN_VERSION | \
-          bash -s -- -r -f -b ./anchore-policy.json ${{steps.setImageDetails.outputs.fullImageName}}
+        uses: anchore/scan-action@v3
+        with:
+          image: ${{steps.setImageDetails.outputs.fullImageName}}
 
       - name: Tag image
         run: |
@@ -96,9 +97,8 @@ jobs:
             docker image push ${{steps.setImageDetails.outputs.dockerRepoName}}:$TAG
           done
 
-      - name: Archive anchore report
-        if: ${{ failure() && matrix.target == 'production' }}
-        uses: actions/upload-artifact@v2
+      - name: upload Anchore scan SARIF report
+        if: ${{ failure() && matrix.target == 'production' }}';'
+        uses: github/codeql-action/upload-sarif@v1
         with:
-          name: anchore-reports-node-${{ matrix.image.runtimeVersion }}
-          path: anchore-reports
+          sarif_file: ${{ steps.scan.outputs.sarif }}

@@ -1,0 +1,41 @@
+ignore:
+  - vulnerability: GHSA-93q8-gq69-wqmw
+    package:
+      type: npm
+      name: ansi-regex
+  - vulnerability: CVE-2021-3807
+    package:
+      type: npm
+      name: ansi-regex
+  - vulnerability:  CVE-2021-43616
+    package:
+      name: npm
+# node.js 14 issues
+  - vulnerability: CVE-2020-8116
+    package:
+      type: npm
+      name: dot-prop
+  - vulnerability: CVE-2015-0903
+    package:
+      type: npm
+      name: editor
+  - vulnerability: GHSA-896r-f27r-55mw
+    package:
+      type: npm
+      name: json-schema
+  - vulnerability: CVE-2021-3918
+    package:
+      type: npm
+      name: json-schema
+  - vulnerability: CVE-2014-1936
+    package:
+      type: npm
+      name: rc
+  - vulnerability: CVE-2020-17753
+    package:
+      type: npm
+      name: rc
+  - vulnerability: CVE-2021-29940
+    package:
+      type: npm
+      name: through
