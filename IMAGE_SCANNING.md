@@ -23,7 +23,7 @@ There are two solutions to address an image vulnerability: patch the Dockerfile 
 
 Generally speaking the only vulnerabilities that are excluded are binaries used by the `npm` command line tool, as these are not exploitable in a running container, and are complicated to update.
 
-The scan output on the GitHub Action log will provide details of the type and severity of the vulnerability, along with the CVE ID of the vulnerability.
+The scan output and the artifacts on the GitHub Action log will provide details of the type and severity of the vulnerability, along with the CVE ID of the vulnerability.
 
 To exclude the vulnerability add an item to the `.grype.yaml`'s `ignore` list. Full details on formatting the YAML can be found in the `grype` documenation under [Specifying Matches to Ignore](https://github.com/anchore/grype#specifying-matches-to-ignore).
 
@@ -31,6 +31,8 @@ The preferred option is to specify the CVE ID, along with the type of vulnerabil
 
 The example below shows the yaml to exclude the `CVE-2021-3807` vulnerability for the `npm` package `ansi-regex`, as well as the `npm` package itself as `CVE-2021-43616`:
 ```
+ignore:
+  - vulnerability: GHSA-93q8-gq69-wqmw
   - vulnerability: CVE-2021-3807
     package:
       type: npm
@@ -83,8 +85,8 @@ docker build --no-cache --tag defra-node:latest --target=production .
 
 Scan the tagged image, i.e. `defra-node:latest`, using  the `grype` configuration file `.grype.yaml`. 
 ```
-grype defra-node:latest --fail-on medium
+grype defra-node:latest --fail-on medium -o json > report.json
 ```
-`Note:` the configuration file is in the default location so does not need specifying on the command line.
+**Note:** the configuration file is in the default location so does not need specifying on the command line.
 
 Full documentation on `grype`` be found at https://github.com/anchore/grype

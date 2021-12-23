@@ -2,7 +2,7 @@
 
 This repository contains Node parent Docker image source code for Defra.
 
-The following table lists the versions of node available, and the parent node image they are based on:
+The following table lists the versions of node available, and the parent Node.js image they are based on:
 
 | Node version  | Parent image       |
 | ------------- | -----------------  |
@@ -17,7 +17,7 @@ Two parent images are created for each version:
 
 It is recommended that services use [multi-stage builds](https://docs.docker.com/develop/develop-images/multistage-build) to produce production and development images, each extending the appropriate parent, from a single Dockerfile.
 
-[Examples](./example) are provided to show how parent images can be extended for different types of services. These should be a good starting point for building Node services conforming to FFC standards.
+[Examples](./example) are provided to show how parent images can be extended for different types of services. These should be a good starting point for building Node services conforming to Defra standards.
 
 ## Building images locally
 
@@ -45,7 +45,7 @@ Images should be tagged according to the Dockerfile version and the version of N
 
 ## CI/CD
 
-On commit GitHub Actions will build both `node` and `node-development` images for the Node.js versions listed in the [image-matrix.json](image-matrix.json) file, and perform a vulnerability scan, as described below.
+On commit GitHub Actions will build both `node` and `node-development` images for the Node.js versions listed in the [image-matrix.json](image-matrix.json) file, and perform a vulnerability scan as described below.
 
 In addition a commit to the master branch will push the images to the [defradigital](https://hub.docker.com/u/defradigital) organisation in Docker Hub using the version tag specified in the [JOB.env](JOB.env) file. This version tag is expected to be manually updated on each release.
 
