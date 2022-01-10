@@ -85,6 +85,10 @@ docker build --no-cache --tag defra-node:latest --target=production .
 
 Scan the tagged image, i.e. `defra-node:latest`, using  the `grype` configuration file `.grype.yaml`. 
 ```
+grype defra-node:latest --fail-on medium
+```
+or
+```
 grype defra-node:latest --fail-on medium -o json > report.json
 ```
 **Note:** the configuration file is in the default location so does not need specifying on the command line.

@@ -36,7 +36,8 @@ jobs:
           image: defradigital/$IMAGE_NAME:$DEFRA_VERSION-node${{matrix.image.runTimeVersion}}
           fail-build: true
           severity-cutoff: "medium"
-      - name: Archive anchore report
+
+      - name: Upload Anchore Grype SARIF report
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
         with:
