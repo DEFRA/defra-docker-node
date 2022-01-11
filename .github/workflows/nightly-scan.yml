@@ -30,13 +30,16 @@ jobs:
       - name: Set job environment variables
         run:  cat JOB.env >> $GITHUB_ENV
       - name: Scan Node.js docker image
-        run: |
-          curl -s https://ci-tools.anchore.io/inline_scan-v$ANCHORE_SCAN_VERSION | \
-          bash -s -- -r -f -p -b ./anchore-policy.json defradigital/$IMAGE_NAME:$DEFRA_VERSION-node${{matrix.image.runTimeVersion}}
-      
-      - name: Archive anchore report
+        id: scan
+        uses: anchore/scan-action@v3
+        with:
+          image: defradigital/$IMAGE_NAME:$DEFRA_VERSION-node${{matrix.image.runTimeVersion}}
+          fail-build: true
+          severity-cutoff: "medium"
+
+      - name: Upload Anchore Grype SARIF report
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
         with:
           name: anchore-reports-node-${{ matrix.image.runtimeVersion }}
-          path: anchore-reports
+          path: ${{ steps.scan.outputs.sarif }}          
