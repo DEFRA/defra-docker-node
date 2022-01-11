@@ -64,7 +64,7 @@ jobs:
           ${{steps.setImageDetails.outputs.latestTag}}
           docker images
 
-      - name: run anchore grype scan
+      - name: run Anchore Grype scan
         id: scan
         if: ${{ matrix.target == 'production' }}
         uses: anchore/scan-action@v3
