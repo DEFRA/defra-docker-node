@@ -33,7 +33,7 @@ jobs:
         id: scan
         uses: anchore/scan-action@v3
         with:
-          image: defradigital/$IMAGE_NAME:$DEFRA_VERSION-node${{matrix.image.runTimeVersion}}
+          image: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-node${{matrix.image.runTimeVersion}}
           fail-build: true
           severity-cutoff: "medium"
 
