@@ -94,3 +94,12 @@ grype defra-node:latest --fail-on medium -o json > report.json
 **Note:** the configuration file is in the default location so does not need specifying on the command line.
 
 Full documentation on `grype`` be found at https://github.com/anchore/grype
+
+## Upgrading Anchore Grype
+
+Grype updates are frequent. To update grype on a *nix system run the update `curl` at  https://github.com/anchore/grype as super user, i.e.
+```
+sudo -i
+curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+exit
+```

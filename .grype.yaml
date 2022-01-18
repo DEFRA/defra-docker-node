@@ -1,4 +1,5 @@
 ignore:
+# All below are node.js 12/14 issues
   - vulnerability: GHSA-93q8-gq69-wqmw
     package:
       type: npm
@@ -11,11 +12,6 @@ ignore:
     package:
       type: npm
       name: npm
-# node.js 12/14 issues
-  - vulnerability: CVE-2020-8116
-    package:
-      type: npm
-      name: dot-prop
   - vulnerability: CVE-2015-0903
     package:
       type: npm
