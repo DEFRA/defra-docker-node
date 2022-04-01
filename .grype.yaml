@@ -36,3 +36,11 @@ ignore:
     package:
       type: npm
       name: through
+  - vulnerability: GHSA-xvch-5gv4-984h
+    package:
+      type: npm
+      name: minimist
+  - vulnerability: CVE-2021-44907
+    package:
+      type: npm
+      name: qs
