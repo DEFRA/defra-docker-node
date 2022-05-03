@@ -40,6 +40,10 @@ ignore:
     package:
       type: npm
       name: minimist
+  - vulnerability: CVE-2021-44906
+    package:
+      type: npm
+      name: minimist      
   - vulnerability: CVE-2021-44907
     package:
       type: npm
