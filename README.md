@@ -8,7 +8,7 @@ The following table lists the versions of node available, and the parent Node.js
 | ------------- | -----------------  |
 | 14.19.2       | 14.19.2-alpine3.15 |
 | 16.15.0       | 16.15.0-alpine3.15 |
-| 18.0.0        | 18.0.0-alpine3.15  |
+| 18.1.0        | 18.1.0-alpine3.15  |
 
 Two parent images are created for each version:
 
