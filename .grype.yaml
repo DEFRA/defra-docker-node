@@ -8,22 +8,10 @@ ignore:
     package:
       type: npm
       name: ansi-regex
-  - vulnerability:  CVE-2021-43616
-    package:
-      type: npm
-      name: npm
   - vulnerability: CVE-2015-0903
     package:
       type: npm
       name: editor
-  - vulnerability: GHSA-896r-f27r-55mw
-    package:
-      type: npm
-      name: json-schema
-  - vulnerability: CVE-2021-3918
-    package:
-      type: npm
-      name: json-schema
   - vulnerability: CVE-2014-1936
     package:
       type: npm
@@ -40,7 +28,7 @@ ignore:
     package:
       type: npm
       name: minimist
-  - vulnerability: CVE-2021-44907
+  - vulnerability: CVE-2021-44906
     package:
       type: npm
-      name: qs
+      name: minimist      
