@@ -1,5 +1,21 @@
 ignore:
-# All below are node.js 12/14 issues
+  - vulnerability: CVE-2021-27498
+    package:
+      type: npm
+      name: opener
+  - vulnerability: CVE-2021-27500
+    package:
+      type: npm
+      name: opener
+  - vulnerability: CVE-2021-27478
+    package:
+      type: npm
+      name: opener
+  - vulnerability: CVE-2021-27482
+    package:
+      type: npm
+      name: opener                  
+# All below are node.js 14/16 issues
   - vulnerability: GHSA-93q8-gq69-wqmw
     package:
       type: npm
@@ -31,4 +47,4 @@ ignore:
   - vulnerability: CVE-2021-44906
     package:
       type: npm
-      name: minimist      
+      name: minimist
