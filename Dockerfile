@@ -1,5 +1,5 @@
 # Set default values for build arguments
-ARG DEFRA_VERSION=1.2.18
+ARG DEFRA_VERSION=1.2.19
 ARG BASE_VERSION=18.3.0-alpine3.15
 
 FROM node:$BASE_VERSION AS production
