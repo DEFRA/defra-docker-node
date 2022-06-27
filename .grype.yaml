@@ -40,3 +40,8 @@ ignore:
     package:
       type: npm
       name: through
+  - vulnerability: GHSA-pfrx-2q88-qq97
+    package:
+      type: npm
+      name: got
+
