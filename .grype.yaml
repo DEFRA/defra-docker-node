@@ -44,4 +44,7 @@ ignore:
     package:
       type: npm
       name: got
-
+  - vulnerability: CVE-2022-33987
+    package:
+      type: npm
+      name: got
