@@ -1,6 +1,6 @@
 # Set default values for build arguments
 ARG DEFRA_VERSION=2.1.1
-ARG BASE_VERSION=16.17.0-alpine3.16
+ARG BASE_VERSION=18.8.0-alpine3.16
 
 FROM node:$BASE_VERSION AS production
 
@@ -16,7 +16,7 @@ ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/internal-ca.crt
 
 # We need a basic init process to handle signals and reap zombie processes, tini handles that
 # Install Internal CA certificate
-RUN apk update && apk add --no-cache tini  apk-tools=2.12.9-r3  && apk add ca-certificates && rm -rf /var/cache/apk/*
+RUN apk update && apk add --no-cache tini && apk add ca-certificates && rm -rf /var/cache/apk/*
 COPY certificates/internal-ca.crt /usr/local/share/ca-certificates/internal-ca.crt
 RUN chmod 644 /usr/local/share/ca-certificates/internal-ca.crt && update-ca-certificates
 
