@@ -48,3 +48,8 @@ ignore:
     package:
       type: npm
       name: got
+  - vulnerability: GHSA-f8q6-p94x-37v3
+    package:
+      type: npm
+      name: minimatch
+
