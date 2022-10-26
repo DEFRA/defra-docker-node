@@ -6,9 +6,9 @@ The following table lists the versions of node available, and the parent Node.js
 
 | Node version  | Parent image       |
 | ------------- | -----------------  |
-| 14.20.0       | 14.20.0-alpine3.16 |
-| 16.17.0       | 16.17.0-alpine3.16 |
-| 18.8.0        | 18.8.0-alpine3.16  |
+| 14.20.1       | 14.20.1-alpine3.16 |
+| 16.18.0       | 16.18.0-alpine3.16 |
+| 18.11.0        | 18.11.0-alpine3.16  |
 
 Two parent images are created for each version:
 
@@ -65,7 +65,7 @@ A simple convenience script [bump](./bump) is provided to substitute version in 
 
 The 'from' and 'to' values to substitute are separated by a colon, and multiple arguments must be separated by a space.
 
-i.e. `./bump 16.13.0:16.17.0 14.18.1:14.20.0` will replace all instances of `16.13.0` with `16.17.0` and all instances of `14.18.1` with `14.20.0`.
+i.e. `./bump 16.13.0:16.18.0 14.18.1:14.20.1` will replace all instances of `16.13.0` with `16.18.0` and all instances of `14.18.1` with `14.20.1`.
 
 ## Licence
 
