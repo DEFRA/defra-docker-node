@@ -52,4 +52,13 @@ ignore:
     package:
       type: npm
       name: minimatch
+  - vulnerability: CVE-2022-38900
+    package:
+      type: npm
+      name: decode-uri-component
+  - vulnerability: GHSA-w573-4hg7-7wgq
+    package:
+      type: npm
+      name: decode-uri-component
+
 
