@@ -60,5 +60,7 @@ ignore:
     package:
       type: npm
       name: decode-uri-component
-
-
+  - vulnerability: GHSA-hrpp-h998-j3pp
+    package:
+      type: npm
+      name: qs
