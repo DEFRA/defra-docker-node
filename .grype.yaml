@@ -36,10 +36,6 @@ ignore:
     package:
       type: npm
       name: rc
-  - vulnerability: CVE-2021-29940
-    package:
-      type: npm
-      name: through
   - vulnerability: GHSA-pfrx-2q88-qq97
     package:
       type: npm
@@ -60,5 +56,7 @@ ignore:
     package:
       type: npm
       name: decode-uri-component
-
-
+  - vulnerability: GHSA-hrpp-h998-j3pp
+    package:
+      type: npm
+      name: qs
