@@ -11,7 +11,7 @@ jobs:
     outputs:
       image: ${{ steps.set-var.outputs.image }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - id: set-var
         run: |
           content=`cat ./image-matrix.json`
@@ -28,7 +28,7 @@ jobs:
         target: ["development", "production"]
         image: ${{fromJSON(needs.get-matrix-values.outputs.image)}}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - id: setEnv
         name: Set Job env vars 
         run: |
