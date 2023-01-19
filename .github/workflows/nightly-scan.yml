@@ -13,11 +13,9 @@ jobs:
       - uses: actions/checkout@v3
       - id: set-var
         run: |
-          content=`cat ./image-matrix.json`
-          content="${content//'%'/'%25'}"
-          content="${content//$'\n'/'%0A'}"
-          content="${content//$'\r'/'%0D'}"
-          echo "::set-output name=image::$content"
+          echo 'image<<EOF' >> $GITHUB_OUTPUT
+          cat ./image-matrix.json >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
   
   anchore-scan:
     runs-on: ubuntu-latest
