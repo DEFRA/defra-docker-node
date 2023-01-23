@@ -11,14 +11,12 @@ jobs:
     outputs:
       image: ${{ steps.set-var.outputs.image }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - id: set-var
         run: |
-          content=`cat ./image-matrix.json`
-          content="${content//'%'/'%25'}"
-          content="${content//$'\n'/'%0A'}"
-          content="${content//$'\r'/'%0D'}"
-          echo "::set-output name=image::$content"
+          echo 'image<<EOF' >> $GITHUB_OUTPUT
+          cat ./image-matrix.json >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
   
   build-images:
     runs-on: ubuntu-latest
@@ -28,7 +26,7 @@ jobs:
         target: ["development", "production"]
         image: ${{fromJSON(needs.get-matrix-values.outputs.image)}}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - id: setEnv
         name: Set Job env vars 
         run: |
@@ -44,14 +42,14 @@ jobs:
             DOCKER_REPO_NAME="defradigital/$IMAGE_NAME-${{matrix.target}}"
           fi
           
-          echo "::set-output name=dockerRepoName::$DOCKER_REPO_NAME"
-          echo "::set-output name=fullImageName::$DOCKER_REPO_NAME:$DEFRA_VERSION-node${{matrix.image.runTimeVersion}}"
+          echo "dockerRepoName=$DOCKER_REPO_NAME" >> $GITHUB_OUTPUT
+          echo "fullImageName=$DOCKER_REPO_NAME:$DEFRA_VERSION-node${{matrix.image.runTimeVersion}}" >> $GITHUB_OUTPUT
 
           if [ ${{matrix.image.latest}} = true ]
           then 
-            echo "::set-output name=latestTag::--tag $DOCKER_REPO_NAME:latest"
+            echo "latestTag=--tag $DOCKER_REPO_NAME:latest" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=latestTag:: "
+            echo "latestTag=" >> $GITHUB_OUTPUT
           fi
 
       - name: Build the Docker image

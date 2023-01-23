@@ -10,14 +10,12 @@ jobs:
     outputs:
       image: ${{ steps.set-var.outputs.image }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - id: set-var
         run: |
-          content=`cat ./image-matrix.json`
-          content="${content//'%'/'%25'}"
-          content="${content//$'\n'/'%0A'}"
-          content="${content//$'\r'/'%0D'}"
-          echo "::set-output name=image::$content"
+          echo 'image<<EOF' >> $GITHUB_OUTPUT
+          cat ./image-matrix.json >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
   
   anchore-scan:
     runs-on: ubuntu-latest
@@ -26,7 +24,7 @@ jobs:
       matrix:
         image: ${{fromJSON(needs.get-matrix-values.outputs.image)}}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set job environment variables
         run:  cat JOB.env >> $GITHUB_ENV
       - name: Scan Node.js docker image
