@@ -43,11 +43,11 @@ LABEL uk.gov.defra.node.repository=defradigital/node-development
 USER root
 RUN apk update && \
     apk add --no-cache git && \
-    apk add --no-cache --virtual .gyp 'python3' make 'g++=~11.2.1'
+    apk add --no-cache --virtual .gyp 'python3' make 'g++'
 # Pact dependencies are not included in Alpine image for contract testing
 RUN apk add --no-cache bash wget \
     && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
-    && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.29-r0/glibc-2.29-r0.apk \
+    && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r0/glibc-2.35-r0.apk \
     # see for need for force-overwrite https://github.com/sgerrand/alpine-pkg-glibc/issues/185
-    && apk add --force-overwrite glibc-2.29-r0.apk
+    && apk add --force-overwrite glibc-2.35-r0.apk
 USER node
