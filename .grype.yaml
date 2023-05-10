@@ -1,9 +1,9 @@
 ignore:
-  - vulnerability: CVE-2023-1255-libcrypto3
+  - vulnerability: CVE-2023-1255
     package:
       type: apk
       name: libcrypto3
-  - vulnerability: CVE-2023-1255-libssl3
+  - vulnerability: CVE-2023-1255
     package:
       type: apk
       name: libssl3
@@ -68,11 +68,11 @@ ignore:
     package:
       type: npm
       name: qs
-  - vulnerability: GHSA-p8p7-x288-28g6-request
+  - vulnerability: GHSA-p8p7-x288-28g6
     package:
       type: npm
       name: request
-  - vulnerability: GHSA-rc47-6667-2j5j-http-cache-semantics
+  - vulnerability: GHSA-rc47-6667-2j5j
     package:
       type: npm
       name: http-cache-semantics
