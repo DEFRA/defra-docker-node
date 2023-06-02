@@ -68,4 +68,11 @@ ignore:
     package:
       type: npm
       name: qs
-  
+  - vulnerability: GHSA-p8p7-x288-28g6
+    package:
+      type: npm
+      name: request
+  - vulnerability: GHSA-rc47-6667-2j5j
+    package:
+      type: npm
+      name: http-cache-semantics
