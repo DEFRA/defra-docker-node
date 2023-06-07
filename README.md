@@ -6,9 +6,9 @@ The following table lists the versions of node available, and the parent Node.js
 
 | Node version  | Parent image       |
 | ------------- | -----------------  |
-| 14.21.1       | 14.21.1-alpine3.16 |
-| 16.18.1       | 16.18.1-alpine3.16 |
-| 18.12.1       | 18.12.1-alpine3.16 |
+| 14.21.3       | 14.21.3-alpine3.17 |
+| 16.20.0       | 16.20.0-alpine3.17 |
+| 18.16.0       | 18.16.0-alpine3.17 |
 
 Two parent images are created for each version:
 
@@ -53,7 +53,7 @@ In addition to the version, the images will also be tagged with the contents of 
 
 ## Image vulnerability scanning
 
-A GitHub Action runs a nightly Anchore Grype scan of the image published to Docker, and will build and scan pre-release images on push. At present the latest Node.js 12, 14, and 16 images are scanned.
+A GitHub Action runs a nightly Anchore Grype scan of the image published to Docker, and will build and scan pre-release images on push. At present the latest Node.js 14, 16 and 18 images are scanned.
 
 This ensures Defra services that use the parent images are starting from a known secure foundation, and can limit patching to only newly added libraries.
 
