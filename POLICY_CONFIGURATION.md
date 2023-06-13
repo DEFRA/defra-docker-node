@@ -6,6 +6,7 @@ The following issues have been added to the policies exclusion list
 
 | CVE Report    |Type      | Component | Reason       | Date |
 | ------------- | -------  |----------| ------------- | -----------------  |
+|[CVE-2023-2650](https://nvd.nist.gov/vuln/detail/CVE-2023-2650)| APK | openssl | Only exploitable by applications that use OBJ_obj2txt() directly, or use any of the OpenSSL subsystems OCSP, PKCS7/SMIME, CMS, CMP/CRMF or TS with no message size limit. This shouldn't be the case for typical applications that consume this base image. | 12/06/2023 |
 |[CVE-2023-1255](https://nvd.nist.gov/vuln/detail/CVE-2023-1255)| APK | openssl | Only exploitable if an attacker can control the size and location of the ciphertext buffer being decrypted by an application using AES-XTS on 64 bit ARM. This shouldn't be exploitable by typical applications that consume this base image. | 02/06/2023 |
 |[GHSA-rc47-6667-2j5j](https://github.com/advisories/GHSA-rc47-6667-2j5j)| NPM | [http-cache-semantics](https://github.com/kornelski/http-cache-semantics) | Required only to build for Node.js 14, the official docker image for Node.js 14 which is no longer maintained. | 02/06/2023 |
 |[GHSA-p8p7-x288-28g6](https://github.com/advisories/GHSA-p8p7-x288-28g6)| NPM | [request](https://github.com/kornelski/http-cache-semantics) | Required only by Node.js 14 docker image which is no longer maintained. Package also not maintained any longer so won't be fixed. | 02/06/2023 |
