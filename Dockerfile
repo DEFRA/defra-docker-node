@@ -20,6 +20,9 @@ RUN apk update && apk add --no-cache tini && apk add ca-certificates && rm -rf /
 COPY certificates/internal-ca.crt /usr/local/share/ca-certificates/internal-ca.crt
 RUN chmod 644 /usr/local/share/ca-certificates/internal-ca.crt && update-ca-certificates
 
+# Temporary measure to mitigate CVE-2023-2650
+RUN apk upgrade libssl3 libcrypto3
+
 ENTRYPOINT ["/sbin/tini", "--"]
 
 # Never run as root, default to the node user (created by the base Node image)
@@ -46,7 +49,7 @@ RUN apk update && \
     apk add --no-cache --virtual .gyp 'python3' make 'g++'
 # Pact dependencies are not included in Alpine image for contract testing
 RUN apk add --no-cache bash wget \
-    && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
-    && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r1/glibc-2.35-r1.apk
+    && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
+    && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r1/glibc-2.35-r1.apk \
     && apk add glibc-2.35-r1.apk
 USER node
