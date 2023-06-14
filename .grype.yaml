@@ -15,19 +15,4 @@ ignore:
     package:
       type: apk
       name: libssl3
-  - vulnerability: CVE-2021-27498
-    package:
-      type: npm
-      name: opener
-  - vulnerability: CVE-2021-27500
-    package:
-      type: npm
-      name: opener
-  - vulnerability: CVE-2021-27478
-    package:
-      type: npm
-      name: opener
-  - vulnerability: CVE-2021-27482
-    package:
-      type: npm
-      name: opener
+  
