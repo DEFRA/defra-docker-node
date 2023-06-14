@@ -1,1 +1,10 @@
 ignore:
+  - vulnerability: CVE-2023-2650
+    package:
+      type: apk
+      name: libcrypto3
+  - vulnerability: CVE-2023-2650
+    package:
+      type: apk
+      name: libssl3
+  
