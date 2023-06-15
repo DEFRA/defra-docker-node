@@ -1,6 +1,6 @@
 # Set default values for build arguments
-ARG DEFRA_VERSION=2.1.5
-ARG BASE_VERSION=18.16.0-alpine3.17
+ARG DEFRA_VERSION=2.2.0
+ARG BASE_VERSION=20.3.0-alpine3.18
 
 FROM node:$BASE_VERSION AS production
 
@@ -19,6 +19,9 @@ ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/internal-ca.crt
 RUN apk update && apk add --no-cache tini && apk add ca-certificates && rm -rf /var/cache/apk/*
 COPY certificates/internal-ca.crt /usr/local/share/ca-certificates/internal-ca.crt
 RUN chmod 644 /usr/local/share/ca-certificates/internal-ca.crt && update-ca-certificates
+
+# Temporary measure to mitigate CVE-2023-2650
+RUN apk upgrade libssl3 libcrypto3
 
 ENTRYPOINT ["/sbin/tini", "--"]
 
@@ -47,7 +50,6 @@ RUN apk update && \
 # Pact dependencies are not included in Alpine image for contract testing
 RUN apk add --no-cache bash wget \
     && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
-    && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r0/glibc-2.35-r0.apk \
-    # see for need for force-overwrite https://github.com/sgerrand/alpine-pkg-glibc/issues/185
-    && apk add --force-overwrite glibc-2.35-r0.apk
+    && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r1/glibc-2.35-r1.apk \
+    && apk add glibc-2.35-r1.apk
 USER node
