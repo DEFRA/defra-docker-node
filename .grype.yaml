@@ -1,1 +1,13 @@
 ignore:
+  - vulnerability: CVE-2023-39331-node
+    package:
+      type: node
+      name: StockMatcherCpeMatch
+  - vulnerability: CVE-2023-39332-node
+    package:
+      type: node
+      name: StockMatcherCpeMatch
+  - vulnerability: GHSA-c2qf-rxjj-qqgw-semver
+    package:
+      type: npm
+      name: semver
