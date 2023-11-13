@@ -1,13 +1,1 @@
 ignore:
-  - vulnerability: GHSA-c2qf-rxjj-qqgw
-    package:
-      type: npm
-      name: semver
-  - vulnerability: CVE-2023-39331
-    package:
-      type: node
-      name: node
-  - vulnerability: CVE-2023-39332
-    package:
-      type: node
-      name: node
