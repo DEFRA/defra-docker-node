@@ -17,7 +17,7 @@ jobs:
           echo 'image<<EOF' >> $GITHUB_OUTPUT
           cat ./image-matrix.json >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
-  
+
   build-images:
     runs-on: ubuntu-latest
     needs:  get-matrix-values
@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - id: setEnv
-        name: Set Job env vars 
+        name: Set Job env vars
         run: |
           cat JOB.env >> $GITHUB_ENV
 
@@ -36,17 +36,17 @@ jobs:
         name: Set image name and latest tag
         run: |
           if [ ${{matrix.target}} = "production" ]
-          then 
+          then
             DOCKER_REPO_NAME="defradigital/$IMAGE_NAME"
           else
             DOCKER_REPO_NAME="defradigital/$IMAGE_NAME-${{matrix.target}}"
           fi
-          
+
           echo "dockerRepoName=$DOCKER_REPO_NAME" >> $GITHUB_OUTPUT
           echo "fullImageName=$DOCKER_REPO_NAME:$DEFRA_VERSION-node${{matrix.image.runTimeVersion}}" >> $GITHUB_OUTPUT
 
           if [ ${{matrix.image.latest}} = true ]
-          then 
+          then
             echo "latestTag=--tag $DOCKER_REPO_NAME:latest" >> $GITHUB_OUTPUT
           else
             echo "latestTag=" >> $GITHUB_OUTPUT
@@ -70,6 +70,7 @@ jobs:
           image: ${{steps.setImageDetails.outputs.fullImageName}}
           fail-build: true
           severity-cutoff: "medium"
+          only-fixed: true
 
       - name: Tag image
         run: |
