@@ -6,9 +6,9 @@ The following table lists the versions of node available, and the parent Node.js
 
 | Node version  | Parent image       |
 | ------------- | -----------------  |
-| 16.20.0       | 16.20.0-alpine3.18 |
-| 18.16.0       | 18.16.0-alpine3.18 |
-| 20.3.0       | 20.3.0-alpine3.18 |
+| 16.20.2       | 16.20.2-alpine3.18 |
+| 18.18.2       | 18.18.2-alpine3.18 |
+| 20.9.0       | 20.9.0-alpine3.18 |
 
 Two parent images are created for each version:
 
@@ -61,7 +61,7 @@ For more details see [Image Scanning](IMAGE_SCANNING.md)
 
 ## Convenience script
 
-A simple convenience script [bump](./bump) is provided to substitute version in the files `Dockerfile`, `README.md`, and `image-matrix.json`. 
+A simple convenience script [bump](./bump) is provided to substitute version in the files `Dockerfile`, `README.md`, and `image-matrix.json`.
 
 The 'from' and 'to' values to substitute are separated by a colon, and multiple arguments must be separated by a space.
 
