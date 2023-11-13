@@ -1,5 +1,5 @@
  [
     {"runtimeVersion": "16.20.2", "tags": ["latest-16"]},
     {"runtimeVersion": "18.18.2", "tags": ["latest-18"]},
-    {"runtimeVersion": "20.3.0", "tags": ["latest", "latest-20"]}
+    {"runtimeVersion": "20.9.0", "tags": ["latest", "latest-20"]}
 ]
