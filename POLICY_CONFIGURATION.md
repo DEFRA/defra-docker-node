@@ -6,3 +6,4 @@ The following issues have been added to the policies exclusion list
 
 | CVE Report    |Type      | Component | Reason       | Date |
 | ------------- | -------  |----------| ------------- | -----------------  |
+|[GHSA-c2qf-rxjj-qqgw](https://github.com/advisories/GHSA-c2qf-rxjj-qqgw)| NPM | [node-semver]https://github.com/npm/node-semver) | Required only to build for Node.js 16, the official docker image for Node.js 16 which is no longer maintained. | 13/11/2023 |

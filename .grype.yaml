@@ -1,1 +1,5 @@
 ignore:
+  - vulnerability: GHSA-c2qf-rxjj-qqgw
+    package:
+      type: npm
+      name: semver
