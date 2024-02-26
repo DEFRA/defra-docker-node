@@ -3,3 +3,7 @@ ignore:
     package:
       type: npm
       name: semver
+  - vulnerability: GHSA-78xj-cgh5-2h22
+    package:
+      type: npm
+      name: ip
