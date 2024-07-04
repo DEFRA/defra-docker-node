@@ -57,7 +57,7 @@ jobs:
           docker build . --file Dockerfile --no-cache \
           --target=${{matrix.target}} \
           --build-arg DEFRA_VERSION=$DEFRA_VERSION \
-          --build-arg BASE_VERSION=${{matrix.image.runtimeVersion}}-${{matrix.image.alpineVersion}} \
+          --build-arg BASE_VERSION=${{matrix.image.runtimeVersion}}-alpine${{matrix.image.alpineVersion}} \
           --tag ${{steps.setImageDetails.outputs.fullImageName}} \
           ${{steps.setImageDetails.outputs.latestTag}}
           docker images
