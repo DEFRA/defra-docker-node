@@ -1,6 +1,6 @@
  [
-    {"runtimeVersion": "16.20.2", "tags": ["latest-16"]},
-    {"runtimeVersion": "18.19.1", "tags": ["latest-18"]},
-    {"runtimeVersion": "20.11.1", "tags": ["latest", "latest-20"]},
-    {"runtimeVersion": "22.4.0", "tags": ["latest-22"]}
+    {"runtimeVersion": "16.20.2", "alpineVersion": "3.18", "tags": ["latest-16"]},
+    {"runtimeVersion": "18.19.1", "alpineVersion": "3.18", "tags": ["latest-18"]},
+    {"runtimeVersion": "20.11.1", "alpineVersion": "3.18", "tags": ["latest", "latest-20"]},
+    {"runtimeVersion": "22.4.0", "alpineVersion": "3.19", "tags": ["latest-22"]}
 ]
