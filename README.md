@@ -6,9 +6,9 @@ The following table lists the versions of node available, and the parent Node.js
 
 | Node version  | Parent image       |
 | ------------- | -----------------  |
-| 16.20.2       | 16.20.2-alpine3.18 |
-| 18.19.1       | 18.19.1-alpine3.18 |
-| 20.11.1       | 20.11.1-alpine3.18 |
+| 18.20.3       | 18.20.3-alpine3.19 |
+| 20.15.0       | 20.15.0-alpine3.19 |
+| 22.4.0        | 22.4.0-alpine3.19  |
 
 Two parent images are created for each version:
 
@@ -36,6 +36,8 @@ The image includes the certificate for the internal [CA](https://en.wikipedia.or
 ## Versioning
 
 Images should be tagged according to the Dockerfile version and the version of Node on which the image is based. For example, for Dockerfile version `1.0.0` based on Node `12.16.0`, the built image would be tagged `1.0.0-node12.16.0`.
+
+Any new features or changes to supported Node or Alpine versions will be published as `minor` version updates.  Any breaking changes to dependencies or how images can be consumed will be published as `major` updates.
 
 ## Example files
 
