@@ -6,9 +6,9 @@ The following table lists the versions of node available, and the parent Node.js
 
 | Node version  | Parent image       |
 | ------------- | -----------------  |
-| 18.20.3       | 18.20.3-alpine3.19 |
-| 20.15.0       | 20.15.0-alpine3.19 |
-| 22.4.0        | 22.4.0-alpine3.19  |
+| 18.20.4       | 18.20.4-alpine3.19 |
+| 20.16.0       | 20.16.0-alpine3.20 |
+| 22.6.0        | 22.6.0-alpine3.20  |
 
 Two parent images are created for each version:
 
