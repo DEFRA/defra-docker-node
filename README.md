@@ -6,9 +6,9 @@ The following table lists the versions of node available, and the parent Node.js
 
 | Node version  | Parent image       |
 | ------------- | -----------------  |
-| 18.20.3       | 18.20.3-alpine3.19 |
-| 20.15.0       | 20.15.0-alpine3.19 |
-| 22.4.0        | 22.4.0-alpine3.19  |
+| 18.20.4       | 18.20.4-alpine3.20 |
+| 20.18.0       | 20.18.0-alpine3.20 |
+| 22.9.0        | 22.9.0-alpine3.20  |
 
 Two parent images are created for each version:
 
@@ -17,7 +17,7 @@ Two parent images are created for each version:
 
 It is recommended that services use [multi-stage builds](https://docs.docker.com/develop/develop-images/multistage-build) to produce production and development images, each extending the appropriate parent, from a single Dockerfile.
 
-[Examples](./example) are provided to show how parent images can be extended for different types of services. These should be a good starting point for building Node services conforming to Defra standards.
+[Examples](https://github.com/DEFRA/defra-docker-node/tree/master/examples) are provided to show how parent images can be extended for different types of services. These should be a good starting point for building Node services conforming to Defra standards.
 
 ## Building images locally
 
