@@ -1,6 +1,6 @@
 # Set default values for build arguments
-ARG DEFRA_VERSION=2.5.0
-ARG BASE_VERSION=22.11.0-alpine3.20
+ARG DEFRA_VERSION=2.6.0
+ARG BASE_VERSION=22.12.0-alpine3.21
 
 FROM node:$BASE_VERSION AS production
 
@@ -19,9 +19,6 @@ ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/internal-ca.crt
 RUN apk update && apk add --no-cache tini && apk add ca-certificates && rm -rf /var/cache/apk/*
 COPY certificates/internal-ca.crt /usr/local/share/ca-certificates/internal-ca.crt
 RUN chmod 644 /usr/local/share/ca-certificates/internal-ca.crt && update-ca-certificates
-
-# Temporary measure to mitigate CVE-2023-2650
-RUN apk upgrade libssl3 libcrypto3
 
 ENTRYPOINT ["/sbin/tini", "--"]
 
