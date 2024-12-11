@@ -20,9 +20,6 @@ RUN apk update && apk add --no-cache tini && apk add ca-certificates && rm -rf /
 COPY certificates/internal-ca.crt /usr/local/share/ca-certificates/internal-ca.crt
 RUN chmod 644 /usr/local/share/ca-certificates/internal-ca.crt && update-ca-certificates
 
-# Temporary measure to mitigate CVE-2023-2650
-RUN apk upgrade libssl3 libcrypto3
-
 ENTRYPOINT ["/sbin/tini", "--"]
 
 # Never run as root, default to the node user (created by the base Node image)
