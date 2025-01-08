@@ -4,3 +4,7 @@ ignore:
     package:
       type: npm
       name: cross-spawn
+  - vulnerability:  CVE-2021-43616
+    package:
+      type: npm
+      name: npm
