@@ -1,5 +1,1 @@
 ignore:
-  - vulnerability: CVE-2024-21538
-    package:
-      type: npm
-      name: cross-spawn
