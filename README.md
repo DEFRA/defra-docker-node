@@ -55,7 +55,7 @@ In addition to the version, the images will also be tagged with the contents of 
 
 ## Image vulnerability scanning
 
-A GitHub Action runs a nightly Anchore Grype scan of the image published to Docker, and will build and scan pre-release images on push. At present the latest Node.js 16, 18 and 20 images are scanned.
+A GitHub Action runs a nightly Anchore Grype scan of the image published to Docker, and will build and scan pre-release images on push. At present the latest Node.js 18, 20 and 22 images are scanned.
 
 This ensures Defra services that use the parent images are starting from a known secure foundation, and can limit patching to only newly added libraries.
 
