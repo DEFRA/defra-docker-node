@@ -1,10 +1,2 @@
 ignore:
-  - vulnerability: GHSA-3xgq-45jj-v275-cross-spawn
-  - vulnerability: CVE-2024-21538
-    package:
-      type: npm
-      name: cross-spawn
   - vulnerability:  CVE-2024-21538
-    package:
-      type: npm
-      name: npm
