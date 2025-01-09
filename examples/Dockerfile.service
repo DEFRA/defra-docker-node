@@ -1,12 +1,12 @@
 # This assumes that the parent image has been built locally using production and development build configuration as defra-node 
 # and defra-node-development tagged with a version.
 
-ARG BASE_VERSION=1.2.1-node12.18.3
+ARG BASE_VERSION=2.5.1-node22.13.0
 FROM defra-node:$BASE_VERSION AS base
 
 # Copy our package files so that our package install will do a clean install. This installs the exact versions of the packages
 #   listed in package-lock.json, and does not update either the package-lock.json or the package.json file.
-# Our production dependancies are now installed.
+# Our production dependencies are now installed.
 COPY --chown=node:node package*.json ./
 RUN npm ci
 
