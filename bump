@@ -13,6 +13,6 @@ else
         read -r cur new <<< $para
         matcher=s/$cur/$new/g
         echo "Updating $cur to $new"
-        sed -i -e $matcher Dockerfile README.md image-matrix.json JOB.env
+        sed -i -e $matcher Dockerfile README.md image-matrix.json JOB.env examples/Dockerfile.{web,service}
     done
 fi
