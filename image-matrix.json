@@ -1,5 +1,5 @@
  [
-    {"runtimeVersion": "18.20.6", "alpineVersion": "3.21", "tags": ["latest-18"]},
-    {"runtimeVersion": "20.18.2", "alpineVersion": "3.21", "tags": ["latest-20"]},
-    {"runtimeVersion": "22.13.1", "alpineVersion": "3.21", "tags": ["latest-22", "latest"]}
+    {"runtimeVersion": "18.20.8", "alpineVersion": "3.21", "tags": ["latest-18"]},
+    {"runtimeVersion": "20.19.0", "alpineVersion": "3.21", "tags": ["latest-20"]},
+    {"runtimeVersion": "22.14.0", "alpineVersion": "3.21", "tags": ["latest-22", "latest"]}
 ]
