@@ -47,5 +47,6 @@ RUN apk add --no-cache bash 'g++' git make 'python3'
 # Pact contract testing
 ADD https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub /etc/apk/keys/sgerrand.rsa.pub
 ADD https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r1/glibc-2.35-r1.apk glibc-2.35-r1.apk
+RUN apk add --no-cache glibc-2.35-r1.apk
 
 USER node
