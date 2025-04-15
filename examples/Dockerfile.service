@@ -1,7 +1,7 @@
 # This assumes that the parent image has been built locally using production and development build configuration as defra-node 
 # and defra-node-development tagged with a version.
 
-ARG BASE_VERSION=2.5.4-node22.14.0
+ARG BASE_VERSION=2.6.0-node22.14.0
 FROM defra-node:$BASE_VERSION AS base
 
 # Copy our package files so that our package install will do a clean install. This installs the exact versions of the packages
