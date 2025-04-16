@@ -1,7 +1,7 @@
 # This assumes that the parent image has been built locally using production and development build configuration as defra-node 
 # and defra-node-development tagged with a version.
 
-ARG BASE_VERSION=2.5.2-node22.13.1
+ARG BASE_VERSION=2.5.2-node22.14.0
 FROM defra-node:$BASE_VERSION AS base
 
 # Set the port that is going to be exposed later on in the Dockerfile as well.
@@ -19,7 +19,7 @@ RUN npm ci
 FROM defra-node-development:$BASE_VERSION AS development
 
 # Expose the PORT passed in to the Dockerfile, and also some development debugging ports that are used during development
-EXPOSE ${PORT} 9229 9230
+EXPOSE ${PORT} 9229
 
 # We copy the installed packages from the production "base" install that was the first stage.
 COPY --from=base --chown=node:node /home/node/package*.json ./

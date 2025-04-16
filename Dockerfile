@@ -1,5 +1,5 @@
 # Set default values for build arguments
-ARG DEFRA_VERSION=2.5.3
+ARG DEFRA_VERSION=2.6.0
 ARG BASE_VERSION=22.14.0-alpine3.21
 
 FROM node:$BASE_VERSION AS production
@@ -7,7 +7,7 @@ FROM node:$BASE_VERSION AS production
 ARG BASE_VERSION
 ARG DEFRA_VERSION
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 # Set global npm dependencies to be stored under the node user directory
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
@@ -16,12 +16,9 @@ ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/internal-ca.crt
 
 # We need a basic init process to handle signals and reap zombie processes, tini handles that
 # Install Internal CA certificate
-RUN apk update && apk add --no-cache tini && apk add ca-certificates && rm -rf /var/cache/apk/*
+RUN apk add --no-cache tini ca-certificates
 COPY certificates/internal-ca.crt /usr/local/share/ca-certificates/internal-ca.crt
 RUN chmod 644 /usr/local/share/ca-certificates/internal-ca.crt && update-ca-certificates
-
-# Temporary measure to mitigate CVE-2023-2650
-RUN apk upgrade libssl3 libcrypto3
 
 ENTRYPOINT ["/sbin/tini", "--"]
 
@@ -38,18 +35,18 @@ LABEL uk.gov.defra.node.node-version=$BASE_VERSION \
 
 FROM production AS development
 
-ENV NODE_ENV development
+ENV NODE_ENV=development
 
 LABEL uk.gov.defra.node.repository=defradigital/node-development
 
-# node-gyp is a common requirement for NPM packages. It must be installed as root.
+# Install common dependencies not included in the base alpine image
 USER root
-RUN apk update && \
-    apk add --no-cache git && \
-    apk add --no-cache --virtual .gyp 'python3' make 'g++'
-# Pact dependencies are not included in Alpine image for contract testing
-RUN apk add --no-cache bash wget \
-    && wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
-    && wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r1/glibc-2.35-r1.apk \
-    && apk add glibc-2.35-r1.apk
+
+# node-gyp is a common requirement for NPM packages.
+RUN apk add --no-cache bash 'g++' git make 'python3'
+# Pact contract testing
+ADD https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub /etc/apk/keys/sgerrand.rsa.pub
+ADD https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r1/glibc-2.35-r1.apk glibc-2.35-r1.apk
+RUN apk add --no-cache glibc-2.35-r1.apk
+
 USER node
