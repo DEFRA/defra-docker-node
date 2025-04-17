@@ -16,7 +16,7 @@ ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/internal-ca.crt
 
 RUN apk add --no-cache tini ca-certificates
 
-# Install Internal CA certificate for Palo Alto firewall and Zscaler proxy
+# Install Internal CA certificate for firewall and Zscaler proxy
 COPY certificates/internal-ca.crt /usr/local/share/ca-certificates/internal-ca.crt
 RUN chmod 644 /usr/local/share/ca-certificates/internal-ca.crt && update-ca-certificates
 
