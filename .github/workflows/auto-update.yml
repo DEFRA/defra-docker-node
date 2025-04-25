@@ -26,6 +26,7 @@ jobs:
           curl -s https://nodejs.org/dist/index.json > node_versions.json
           latest_node_version=$(jq -r '[.[] | select(.lts != false)][0].version' node_versions.json)
           echo "latest_node_version=${latest_node_version#v}" >> $GITHUB_ENV
+          rm node_versions.json
 
       - name: Extract current Alpine version
         id: extract-alpine
@@ -76,26 +77,9 @@ jobs:
           # Update JOB.env
           sed -i "s/DEFRA_VERSION=.*/DEFRA_VERSION=${new_defra_version}/" JOB.env
           echo "Updated JOB.env"
-          cat JOB.env
 
           # Update image-matrix.json
           jq --arg version "$latest_node_version" 'map(if .runtimeVersion == env.current_node_version then .runtimeVersion = $version else . end)' image-matrix.json > tmp.json && mv tmp.json image-matrix.json
-
-      - name: Debug variables
-        if: env.update_needed == 'true'
-        run: |
-          echo "latest_node_version=${latest_node_version}"
-          echo "current_alpine_version=${current_alpine_version}"
-          echo "current_node_version=${current_node_version}"
-          echo "current_defra_version=${current_defra_version}"
-          echo "new_defra_version=${new_defra_version}"
-
-      - name: Debug file changes
-        if: env.update_needed == 'true'
-        run: |
-          echo "Checking changes after update:"
-          git status
-          git diff
 
       - name: Commit and push changes
         if: env.update_needed == 'true'
@@ -104,7 +88,6 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           branch_name="update-node-base-image-${{ github.run_id }}"
           git checkout -b "$branch_name"
-          # Ensure all changes are staged
           git add Dockerfile README.md JOB.env image-matrix.json
           git commit -m "Update Node.js base image to ${{ env.latest_node_version }}"
           git push origin "$branch_name"
@@ -118,4 +101,4 @@ jobs:
           base: master
           title: "Update Node.js base image to ${{ env.latest_node_version }}"
           body: |
-            Updates the Node.js base image to version ${{ env.latest_node_version }}
+            Updates the Node.js base image to version ${{ env.latest_node_version }}.
