@@ -74,17 +74,18 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b update-node-base-image
+          branch_name="update-node-base-image-${{ github.run_id }}"
+          git checkout -b "$branch_name"
           git add Dockerfile README.md JOB.env image-matrix.json
           git commit -m "Update Node.js base image to ${latest_version}"
-          git push origin update-node-base-image
+          git push origin "$branch_name"
 
       - name: Create pull request
         if: env.update_needed == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: update-node-base-image
+          branch: update-node-base-image-${{ github.run_id }}
           base: main
           title: "Update Node.js base image to ${latest_version}"
           body: |
