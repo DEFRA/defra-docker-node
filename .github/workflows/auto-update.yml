@@ -56,15 +56,19 @@ jobs:
         if: env.update_needed == 'true'
         run: |
           # Update Dockerfile
-          sed -i "s/ARG BASE_VERSION=.*/ARG BASE_VERSION=${latest_version}-alpine${current_alpine_version}/" Dockerfile
+          if ! sed -i "s/ARG BASE_VERSION=.*/ARG BASE_VERSION=${latest_version}-alpine${current_alpine_version}/" Dockerfile; then
+            echo "Failed to update Dockerfile"
+          fi
 
           # Update README.md
-          sed -i "s/| [0-9.]* | ${current_version%-alpine*}-alpine${current_alpine_version} |/| ${latest_version} | ${latest_version}-alpine${current_alpine_version} |/" README.md
+          if ! sed -i "s/| [0-9.]* | ${current_version%-alpine*}-alpine${current_alpine_version} |/| ${latest_version} | ${latest_version}-alpine${current_alpine_version} |/" README.md; then
+            echo "Failed to update README.md"
+          fi
 
           # Update JOB.env
-          current_defra_version=$(grep -oP 'DEFRA_VERSION=\K[\d.]+' JOB.env)
-          new_defra_version=$(echo "$current_defra_version" | awk -F. '{print $1"."$2"."$3+1}')
-          sed -i "s/DEFRA_VERSION=.*/DEFRA_VERSION=${new_defra_version}/" JOB.env
+          if ! sed -i "s/DEFRA_VERSION=.*/DEFRA_VERSION=${new_defra_version}/" JOB.env; then
+            echo "Failed to update JOB.env"
+          fi
 
           # Update image-matrix.json
           jq --arg version "$latest_version" 'map(if .runtimeVersion == env.current_version then .runtimeVersion = $version else . end)' image-matrix.json > tmp.json && mv tmp.json image-matrix.json
