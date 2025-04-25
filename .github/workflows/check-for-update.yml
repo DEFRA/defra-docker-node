@@ -1,0 +1,86 @@
+name: Update Node.js Base Image
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # Runs daily at 2:00 AM UTC
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  check-and-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22 # Use a stable Node.js version for the script
+
+      - name: Fetch latest Node.js versions
+        id: fetch-latest
+        run: |
+          curl -s https://nodejs.org/dist/index.json > node_versions.json
+          latest_version=$(jq -r '[.[] | select(.lts != false)][0].version' node_versions.json)
+          echo "latest_version=${latest_version#v}" >> $GITHUB_ENV
+
+      - name: Extract current Alpine version
+        id: extract-alpine
+        run: |
+          current_alpine_version=$(grep -oP 'ARG BASE_VERSION=[\d.]+-alpine\K[\d.]+' Dockerfile)
+          echo "current_alpine_version=${current_alpine_version}" >> $GITHUB_ENV
+
+      - name: Check if update is needed
+        id: check-update
+        run: |
+          current_version=$(grep -oP 'ARG BASE_VERSION=\K[\d.]+-alpine[\d.]+' Dockerfile)
+          if [[ "$latest_version" != "${current_version%-alpine*}" ]]; then
+            echo "update_needed=true" >> $GITHUB_ENV
+          else
+            echo "update_needed=false" >> $GITHUB_ENV
+
+      - name: Check Docker image availability
+        id: check-docker-image
+        run: |
+          image="node:${latest_version}-alpine${current_alpine_version}"
+          if ! docker pull "$image" &>/dev/null; then
+            echo "update_needed=false" >> $GITHUB_ENV
+            echo "Docker image $image not available. Skipping update."
+          fi
+
+      - name: Update files
+        if: env.update_needed == 'true'
+        run: |
+          # Update Dockerfile
+          sed -i "s/ARG BASE_VERSION=.*/ARG BASE_VERSION=${latest_version}-alpine${current_alpine_version}/" Dockerfile
+
+          # Update README.md
+          sed -i "s/| [0-9.]* | ${current_version%-alpine*}-alpine${current_alpine_version} |/| ${latest_version} | ${latest_version}-alpine${current_alpine_version} |/" README.md
+
+          # Update JOB.env
+          current_defra_version=$(grep -oP 'DEFRA_VERSION=\K[\d.]+' JOB.env)
+          new_defra_version=$(echo "$current_defra_version" | awk -F. '{print $1"."$2"."$3+1}')
+          sed -i "s/DEFRA_VERSION=.*/DEFRA_VERSION=${new_defra_version}/" JOB.env
+
+          # Update image-matrix.json
+          jq --arg version "$latest_version" 'map(if .runtimeVersion == env.current_version then .runtimeVersion = $version else . end)' image-matrix.json > tmp.json && mv tmp.json image-matrix.json
+
+      - name: Commit and push changes
+        if: env.update_needed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b update-node-base-image
+          git add Dockerfile README.md JOB.env image-matrix.json
+          git commit -m "Update Node.js base image to ${latest_version}"
+          git push origin update-node-base-image
+
+      - name: Create pull request
+        if: env.update_needed == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: update-node-base-image
+          title: "Update Node.js base image to ${latest_version}"
+          body: |
+            Updates the Node.js base image to version ${latest_version}.
