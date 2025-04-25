@@ -13,7 +13,6 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Fetch latest Node.js versions
-        id: fetch-latest
         run: |
           curl -s https://nodejs.org/dist/index.json > node_versions.json
           latest_node_version=$(jq -r '[.[] | select(.lts != false)][0].version' node_versions.json)
@@ -21,13 +20,11 @@ jobs:
           rm node_versions.json
 
       - name: Extract current Alpine version
-        id: extract-alpine
         run: |
           current_alpine_version=$(grep -oP 'ARG BASE_VERSION=[\d.]+-alpine\K[\d.]+' Dockerfile)
           echo "current_alpine_version=${current_alpine_version}" >> $GITHUB_ENV
 
       - name: Check if update is needed
-        id: check-update
         run: |
           current_node_version=$(grep -oP 'ARG BASE_VERSION=\K[\d.]+' Dockerfile)
           if [[ "$latest_node_version" != "$current_node_version" ]]; then
@@ -38,7 +35,7 @@ jobs:
           fi
 
       - name: Check Docker image availability
-        id: check-docker-image
+        if: env.update_needed == 'true'
         run: |
           image="node:${latest_node_version}-alpine${current_alpine_version}"
           if ! docker pull "$image" &>/dev/null; then
