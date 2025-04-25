@@ -3,6 +3,9 @@ name: AUTO-UPDATE
 on:
   schedule:
     - cron: '0 2 * * *'
+  push:
+    branches:
+      - auto-update
   workflow_dispatch:
 
 jobs:
