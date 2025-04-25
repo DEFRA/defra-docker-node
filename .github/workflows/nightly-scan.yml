@@ -31,7 +31,7 @@ jobs:
         id: scan
         uses: anchore/scan-action@v3
         with:
-          image: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-node${{matrix.image.runTimeVersion}}
+          image: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-node${{matrix.image.nodeVersion}}
           fail-build: true
           severity-cutoff: "medium"
           only-fixed: true
@@ -40,5 +40,5 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
-          name: anchore-reports-node-${{ matrix.image.runtimeVersion }}
+          name: anchore-reports-node-${{ matrix.image.nodeVersion }}
           path: ${{ steps.scan.outputs.sarif }}
