@@ -79,7 +79,7 @@ jobs:
           echo "Updated JOB.env"
 
           # Update image-matrix.json
-          jq --arg version "$latest_node_version" 'map(if .runtimeVersion == env.current_node_version then .runtimeVersion = $version else . end)' image-matrix.json > tmp.json && mv tmp.json image-matrix.json
+          jq --compact-output --arg version "$latest_node_version" 'map(if .runtimeVersion == env.current_node_version then .runtimeVersion = $version else . end)' image-matrix.json > tmp.json && mv tmp.json image-matrix.json
 
       - name: Commit and push changes
         if: env.update_needed == 'true'
