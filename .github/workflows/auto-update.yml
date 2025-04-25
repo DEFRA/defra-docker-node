@@ -108,3 +108,10 @@ jobs:
           title: "Update Node.js base image to ${{ env.latest_node_version }}"
           body: |
             Updates the Node.js base image to version ${{ env.latest_node_version }}.
+
+      - name: Verify branch state
+        if: env.update_needed == 'true'
+        run: |
+          git fetch origin
+          git checkout update-node-base-image-${{ github.run_id }}
+          git log --oneline
