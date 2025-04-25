@@ -69,7 +69,7 @@ jobs:
           echo "Updated Dockerfile"
 
           # Update README.md
-          sed -i "s/| ${current_node_version}-alpine${current_alpine_version}* |/| ${latest_node_version} | ${latest_node_version}-alpine${current_alpine_version} |/" README.md
+          sed -i "s/| ${current_node_version}-alpine${current_alpine_version}[^\|]* |/| ${latest_node_version} | ${latest_node_version}-alpine${current_alpine_version} |/" README.md
           echo "Updated README.md"
           cat README.md
 
@@ -87,6 +87,7 @@ jobs:
           echo "latest_node_version=${latest_node_version}"
           echo "current_alpine_version=${current_alpine_version}"
           echo "current_node_version=${current_node_version}"
+          echo "current_defra_version=${current_defra_version}"
           echo "new_defra_version=${new_defra_version}"
 
       - name: Debug file changes
@@ -114,7 +115,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: update-node-base-image-${{ github.run_id }}
-          base: master # Replace 'master' with your repository's default branch
+          base: master
           title: "Update Node.js base image to ${{ env.latest_node_version }}"
           body: |
             Updates the Node.js base image to version ${{ env.latest_node_version }}
