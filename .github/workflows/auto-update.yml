@@ -72,7 +72,6 @@ jobs:
           # Update README.md
           sed -i "s/|[[:space:]]*${current_node_version}[[:space:]]*|[[:space:]]*${current_node_version}-alpine${current_alpine_version}[[:space:]]*|/| ${latest_node_version}       | ${latest_node_version}-alpine${current_alpine_version} |/" README.md
           echo "Updated README.md"
-          cat README.md
 
           # Update JOB.env
           sed -i "s/DEFRA_VERSION=.*/DEFRA_VERSION=${new_defra_version}/" JOB.env
@@ -93,13 +92,13 @@ jobs:
           git commit -m "Update Node.js base image to ${{ env.latest_node_version }}"
           git push origin "$branch_name"
 
-      # - name: Create pull request
-      #   if: env.update_needed == 'true'
-      #   uses: peter-evans/create-pull-request@v5
-      #   with:
-      #     token: ${{ secrets.GITHUB_TOKEN }}
-      #     branch: update-node-base-image-${{ github.run_id }}
-      #     base: master
-      #     title: "Update Node.js base image to ${{ env.latest_node_version }}"
-      #     body: |
-      #       Updates the Node.js base image to version ${{ env.latest_node_version }}.
+      - name: Create pull request
+        if: env.update_needed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: update-node-base-image-${{ github.run_id }}
+          base: master
+          title: "Update Node.js base image to ${{ env.latest_node_version }}"
+          body: |
+            Updates the Node.js base image to version ${{ env.latest_node_version }}.
