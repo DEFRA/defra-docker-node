@@ -43,7 +43,7 @@ jobs:
           fi
 
           echo "dockerRepoName=$DOCKER_REPO_NAME" >> $GITHUB_OUTPUT
-          echo "fullImageName=$DOCKER_REPO_NAME:$DEFRA_VERSION-node${{matrix.image.runTimeVersion}}" >> $GITHUB_OUTPUT
+          echo "fullImageName=$DOCKER_REPO_NAME:$DEFRA_VERSION-node${{matrix.image.nodeVersion}}" >> $GITHUB_OUTPUT
 
           if [ ${{matrix.image.latest}} = true ]
           then
@@ -57,7 +57,7 @@ jobs:
           docker build . --file Dockerfile --no-cache \
           --target=${{matrix.target}} \
           --build-arg DEFRA_VERSION=$DEFRA_VERSION \
-          --build-arg BASE_VERSION=${{matrix.image.runtimeVersion}}-alpine${{matrix.image.alpineVersion}} \
+          --build-arg BASE_VERSION=${{matrix.image.nodeVersion}}-alpine${{matrix.image.alpineVersion}} \
           --tag ${{steps.setImageDetails.outputs.fullImageName}} \
           ${{steps.setImageDetails.outputs.latestTag}}
           docker images
@@ -102,5 +102,5 @@ jobs:
         if: ${{ failure() && matrix.target == 'production' }}
         uses: actions/upload-artifact@v4
         with:
-          name: anchore-reports-node-${{ matrix.image.runtimeVersion }}
+          name: anchore-reports-node-${{ matrix.image.nodeVersion }}
           path: ${{ steps.scan.outputs.sarif }}
