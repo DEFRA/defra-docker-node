@@ -92,6 +92,12 @@ jobs:
           git commit -m "Update Node.js base image to ${{ env.latest_node_version }}"
           git push --set-upstream origin "$branch_name"
 
+      - name: Debug branch state
+        if: env.update_needed == 'true'
+        run: |
+          git log --oneline
+          git status
+
       - name: Create pull request
         if: env.update_needed == 'true'
         uses: peter-evans/create-pull-request@v7
