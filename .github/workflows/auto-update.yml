@@ -24,8 +24,8 @@ jobs:
         id: fetch-latest
         run: |
           curl -s https://nodejs.org/dist/index.json > node_versions.json
-          latest_version=$(jq -r '[.[] | select(.lts != false)][0].version' node_versions.json)
-          echo "latest_version=${latest_version#v}" >> $GITHUB_ENV
+          latest_node_version=$(jq -r '[.[] | select(.lts != false)][0].version' node_versions.json)
+          echo "latest_node_version=${latest_node_version#v}" >> $GITHUB_ENV
 
       - name: Extract current Alpine version
         id: extract-alpine
@@ -36,9 +36,10 @@ jobs:
       - name: Check if update is needed
         id: check-update
         run: |
-          current_version=$(grep -oP 'ARG BASE_VERSION=\K[\d.]+-alpine[\d.]+' Dockerfile)
-          if [[ "$latest_version" != "${current_version%-alpine*}" ]]; then
+          current_node_version=$(grep -oP 'ARG BASE_VERSION=\K[\d.]+' Dockerfile)
+          if [[ "$latest_node_version" != "$current_node_version" ]]; then
             echo "update_needed=true" >> $GITHUB_ENV
+            echo "current_node_version=${current_node_version}" >> $GITHUB_ENV
           else
             echo "update_needed=false" >> $GITHUB_ENV
           fi
@@ -46,53 +47,46 @@ jobs:
       - name: Check Docker image availability
         id: check-docker-image
         run: |
-          image="node:${latest_version}-alpine${current_alpine_version}"
+          image="node:${latest_node_version}-alpine${current_alpine_version}"
           if ! docker pull "$image" &>/dev/null; then
             echo "update_needed=false" >> $GITHUB_ENV
             echo "Docker image $image not available. Skipping update."
           fi
 
+      - name: Update Defra version
+        if: env.update_needed == 'true'
+        run: |
+          current_defra_version=$(grep -oP 'DEFRA_VERSION=\K[\d.]+' JOB.env)
+          new_defra_version=$(echo "$current_defra_version" | awk -F. '{print $1"."$2"."$3+1}')
+          echo "current_defra_version=${current_defra_version}" >> $GITHUB_ENV
+          echo "new_defra_version=${new_defra_version}" >> $GITHUB_ENV
+
       - name: Update files
         if: env.update_needed == 'true'
         run: |
           # Update Dockerfile
-          sed -i "s/ARG BASE_VERSION=.*/ARG BASE_VERSION=${latest_version}-alpine${current_alpine_version}/" Dockerfile
-          echo "Updated Dockerfile:"
-          cat Dockerfile
+          sed -i "s/ARG BASE_VERSION=.*/ARG BASE_VERSION=${latest_node_version}-alpine${current_alpine_version}/" Dockerfile
+          echo "Updated Dockerfile"
 
           # Update README.md
-          sed -i "s/| [0-9.]* | ${current_version%-alpine*}-alpine${current_alpine_version} |/| ${latest_version} | ${latest_version}-alpine${current_alpine_version} |/" README.md
-          echo "Updated README.md:"
+          sed -i "s/| ${current_node_version}-alpine${current_alpine_version}* |/| ${latest_node_version} | ${latest_node_version}-alpine${current_alpine_version} |/" README.md
+          echo "Updated README.md"
           cat README.md
 
           # Update JOB.env
           sed -i "s/DEFRA_VERSION=.*/DEFRA_VERSION=${new_defra_version}/" JOB.env
-          echo "Updated JOB.env:"
+          echo "Updated JOB.env"
           cat JOB.env
 
           # Update image-matrix.json
-          jq --arg version "$latest_version" 'map(if .runtimeVersion == env.current_version then .runtimeVersion = $version else . end)' image-matrix.json > tmp.json && mv tmp.json image-matrix.json
-
-      - name: Debug jq command
-        if: env.update_needed == 'true'
-        run: |
-          echo "Original image-matrix.json:"
-          cat image-matrix.json
-          jq --arg version "$latest_version" 'map(if .runtimeVersion == env.current_version then .runtimeVersion = $version else . end)' image-matrix.json > tmp.json && mv tmp.json image-matrix.json
-          echo "Updated image-matrix.json:"
-          cat image-matrix.json
-
-      - name: Verify files exist
-        if: env.update_needed == 'true'
-        run: |
-          ls -l Dockerfile README.md JOB.env image-matrix.json
+          jq --arg version "$latest_node_version" 'map(if .runtimeVersion == env.current_node_version then .runtimeVersion = $version else . end)' image-matrix.json > tmp.json && mv tmp.json image-matrix.json
 
       - name: Debug variables
         if: env.update_needed == 'true'
         run: |
-          echo "latest_version=${latest_version}"
+          echo "latest_node_version=${latest_node_version}"
           echo "current_alpine_version=${current_alpine_version}"
-          echo "current_version=${current_version}"
+          echo "current_node_version=${current_node_version}"
           echo "new_defra_version=${new_defra_version}"
 
       - name: Debug file changes
@@ -111,7 +105,7 @@ jobs:
           git checkout -b "$branch_name"
           # Ensure all changes are staged
           git add Dockerfile README.md JOB.env image-matrix.json
-          git commit -m "Update Node.js base image to ${{ env.latest_version }}"
+          git commit -m "Update Node.js base image to ${{ env.latest_node_version }}"
           git push origin "$branch_name"
 
       - name: Create pull request
@@ -121,8 +115,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: update-node-base-image-${{ github.run_id }}
           base: master # Replace 'master' with your repository's default branch
-          title: "Update Node.js base image to ${{ env.latest_version }}"
+          title: "Update Node.js base image to ${{ env.latest_node_version }}"
           body: |
-            Updates the Node.js base image to version ${{ env.latest_version }}.
-            - Updated `Dockerfile` to use Node.js ${{ env.latest_version }}.
-            - Updated `README.md`, `JOB.env`, and `image-matrix.json` accordingly.
+            Updates the Node.js base image to version ${{ env.latest_node_version }}
