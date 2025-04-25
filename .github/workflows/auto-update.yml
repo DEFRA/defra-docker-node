@@ -56,27 +56,44 @@ jobs:
         if: env.update_needed == 'true'
         run: |
           # Update Dockerfile
-          if ! sed -i "s/ARG BASE_VERSION=.*/ARG BASE_VERSION=${latest_version}-alpine${current_alpine_version}/" Dockerfile; then
-            echo "Failed to update Dockerfile"
-          fi
+          sed -i "s/ARG BASE_VERSION=.*/ARG BASE_VERSION=${latest_version}-alpine${current_alpine_version}/" Dockerfile
+          echo "Updated Dockerfile:"
+          cat Dockerfile
 
           # Update README.md
-          if ! sed -i "s/| [0-9.]* | ${current_version%-alpine*}-alpine${current_alpine_version} |/| ${latest_version} | ${latest_version}-alpine${current_alpine_version} |/" README.md; then
-            echo "Failed to update README.md"
-          fi
+          sed -i "s/| [0-9.]* | ${current_version%-alpine*}-alpine${current_alpine_version} |/| ${latest_version} | ${latest_version}-alpine${current_alpine_version} |/" README.md
+          echo "Updated README.md:"
+          cat README.md
 
           # Update JOB.env
-          if ! sed -i "s/DEFRA_VERSION=.*/DEFRA_VERSION=${new_defra_version}/" JOB.env; then
-            echo "Failed to update JOB.env"
-          fi
+          sed -i "s/DEFRA_VERSION=.*/DEFRA_VERSION=${new_defra_version}/" JOB.env
+          echo "Updated JOB.env:"
+          cat JOB.env
 
           # Update image-matrix.json
           jq --arg version "$latest_version" 'map(if .runtimeVersion == env.current_version then .runtimeVersion = $version else . end)' image-matrix.json > tmp.json && mv tmp.json image-matrix.json
+
+      - name: Debug jq command
+        if: env.update_needed == 'true'
+        run: |
+          echo "Original image-matrix.json:"
+          cat image-matrix.json
+          jq --arg version "$latest_version" 'map(if .runtimeVersion == env.current_version then .runtimeVersion = $version else . end)' image-matrix.json > tmp.json && mv tmp.json image-matrix.json
+          echo "Updated image-matrix.json:"
+          cat image-matrix.json
 
       - name: Verify files exist
         if: env.update_needed == 'true'
         run: |
           ls -l Dockerfile README.md JOB.env image-matrix.json
+
+      - name: Debug variables
+        if: env.update_needed == 'true'
+        run: |
+          echo "latest_version=${latest_version}"
+          echo "current_alpine_version=${current_alpine_version}"
+          echo "current_version=${current_version}"
+          echo "new_defra_version=${new_defra_version}"
 
       - name: Debug file changes
         if: env.update_needed == 'true'
