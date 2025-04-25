@@ -85,6 +85,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: update-node-base-image
+          base: main
           title: "Update Node.js base image to ${latest_version}"
           body: |
             Updates the Node.js base image to version ${latest_version}.
