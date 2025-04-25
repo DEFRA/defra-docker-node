@@ -70,7 +70,7 @@ jobs:
           echo "Updated Dockerfile"
 
           # Update README.md
-          sed -i "s/| [0-9.]* | ${current_node_version}-alpine${current_alpine_version} |/| ${latest_node_version} | ${latest_node_version}-alpine${current_alpine_version} |/" README.md
+          sed -i "s/|[[:space:]]*${current_node_version}[[:space:]]*|[[:space:]]*${current_node_version}-alpine${current_alpine_version}[[:space:]]*|/| ${latest_node_version} | ${latest_node_version}-alpine${current_alpine_version} |/" README.md
           echo "Updated README.md"
           cat README.md
 
