@@ -12,11 +12,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22
-
       - name: Fetch latest Node.js versions
         id: fetch-latest
         run: |
