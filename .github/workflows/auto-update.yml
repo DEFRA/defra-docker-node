@@ -41,6 +41,7 @@ jobs:
             echo "update_needed=true" >> $GITHUB_ENV
           else
             echo "update_needed=false" >> $GITHUB_ENV
+          fi
 
       - name: Check Docker image availability
         id: check-docker-image
