@@ -76,8 +76,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           branch_name="update-node-base-image-${{ github.run_id }}"
           git checkout -b "$branch_name"
+          # Ensure all changes are staged
           git add Dockerfile README.md JOB.env image-matrix.json
-          git commit -m "Update Node.js base image to ${latest_version}"
+          git commit -m "Update Node.js base image to ${{ env.latest_version }}"
           git push origin "$branch_name"
 
       - name: Create pull request
@@ -86,7 +87,9 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: update-node-base-image-${{ github.run_id }}
-          base: master
-          title: "Update Node.js base image to ${latest_version}"
+          base: master # Replace 'master' with your repository's default branch
+          title: "Update Node.js base image to ${{ env.latest_version }}"
           body: |
-            Updates the Node.js base image to version ${latest_version}.
+            Updates the Node.js base image to version ${{ env.latest_version }}.
+            - Updated `Dockerfile` to use Node.js ${{ env.latest_version }}.
+            - Updated `README.md`, `JOB.env`, and `image-matrix.json` accordingly.
