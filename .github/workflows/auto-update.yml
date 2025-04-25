@@ -69,6 +69,18 @@ jobs:
           # Update image-matrix.json
           jq --arg version "$latest_version" 'map(if .runtimeVersion == env.current_version then .runtimeVersion = $version else . end)' image-matrix.json > tmp.json && mv tmp.json image-matrix.json
 
+      - name: Verify files exist
+        if: env.update_needed == 'true'
+        run: |
+          ls -l Dockerfile README.md JOB.env image-matrix.json
+
+      - name: Debug file changes
+        if: env.update_needed == 'true'
+        run: |
+          echo "Checking changes after update:"
+          git status
+          git diff
+
       - name: Commit and push changes
         if: env.update_needed == 'true'
         run: |
