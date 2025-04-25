@@ -2,8 +2,8 @@ name: Update Node.js Base Image
 
 on:
   schedule:
-    - cron: '0 2 * * *' # Runs daily at 2:00 AM UTC
-  workflow_dispatch: # Allows manual triggering of the workflow
+    - cron: '0 2 * * *'
+  workflow_dispatch:
 
 jobs:
   check-and-update:
@@ -15,7 +15,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 22 # Use a stable Node.js version for the script
+          node-version: 22
 
       - name: Fetch latest Node.js versions
         id: fetch-latest
