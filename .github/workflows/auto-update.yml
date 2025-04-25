@@ -81,17 +81,6 @@ jobs:
           sed -i "s/\"nodeVersion\": \"${current_node_version}\"/\"nodeVersion\": \"${latest_node_version}\"/" image-matrix.json
           echo "Updated image-matrix.json"
 
-      # - name: Commit and push changes
-      #   if: env.update_needed == 'true'
-      #   run: |
-      #     git config user.name "github-actions[bot]"
-      #     git config user.email "github-actions[bot]@users.noreply.github.com"
-      #     branch_name="update-node-base-image-${{ github.run_id }}"
-      #     git checkout -b "$branch_name"
-      #     git add Dockerfile README.md JOB.env image-matrix.json
-      #     git commit -m "Update Node.js base image to ${{ env.latest_node_version }}"
-      #     git push --set-upstream origin "$branch_name"
-
       - name: Create pull request
         if: env.update_needed == 'true'
         uses: peter-evans/create-pull-request@v7
