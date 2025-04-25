@@ -1,4 +1,4 @@
-name: Update Node.js Base Image
+name: AUTO-UPDATE
 
 on:
   schedule:
