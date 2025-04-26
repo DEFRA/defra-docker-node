@@ -75,7 +75,7 @@ jobs:
         if: env.update_needed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
           branch: update-node-base-image-${{ env.latest_node_version }}
           base: master
           title: "Update Node.js base image to ${{ env.latest_node_version }}"
