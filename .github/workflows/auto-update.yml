@@ -71,11 +71,19 @@ jobs:
           sed -i "s/\"nodeVersion\": \"${current_node_version}\"/\"nodeVersion\": \"${latest_node_version}\"/" image-matrix.json
           echo "Updated image-matrix.json"
 
+      - name: Generate GitHub App token
+        if: env.update_needed == 'true'
+        id: generate-token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Create pull request
         if: env.update_needed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ steps.generate-token.outputs.token }}
           branch: update-node-base-image-${{ env.latest_node_version }}
           base: master
           title: "Update Node.js base image to ${{ env.latest_node_version }}"
