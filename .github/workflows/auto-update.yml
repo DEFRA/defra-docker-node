@@ -43,6 +43,8 @@ jobs:
             fi
           done
 
+          echo "update_needed=${update_needed}" >> $GITHUB_ENV
+
       - name: Update files
         if: env.update_needed == 'true'
         run: |
