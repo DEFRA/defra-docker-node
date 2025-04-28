@@ -105,22 +105,17 @@ jobs:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - name: Debug
+      - name: Create pull request
         if: env.update_needed == 'true'
-        run: |
-          echo ${{ vars.PR_REVIEW_TEAM }}
-
-      # - name: Create pull request
-      #   if: env.update_needed == 'true'
-      #   uses: peter-evans/create-pull-request@v7
-      #   with:
-      #     token: ${{ steps.generate-token.outputs.token }}
-      #     branch: ${{ env.pull_request_branch }}
-      #     base: master
-      #     title: ${{ env.pull_request_title }}
-      #     body: |
-      #       Updates the Node.js base images to the latest versions:
-      #       ${{ env.pull_request_body }}
-      #     sign-commits: true
-      #     commit-message: ${{ env.pull_request_title }}
-      #     team-reviewers: ${{ vars.PR_REVIEW_TEAM }}
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          branch: ${{ env.pull_request_branch }}
+          base: master
+          title: ${{ env.pull_request_title }}
+          body: |
+            Updates the Node.js base images to the latest versions:
+            ${{ env.pull_request_body }}
+          sign-commits: true
+          commit-message: ${{ env.pull_request_title }}
+          team-reviewers: ${{ vars.PR_REVIEW_TEAM }}
