@@ -21,7 +21,6 @@ jobs:
         id: check-updates
         run: |
           latest_versions=$(jq -r '[.[] | {major: (.version | ltrimstr("v") | split(".")[0] | tonumber), version: (.version | ltrimstr("v"))}] | group_by(.major) | map({(.[0].major | tostring): .[0].version}) | add' node_versions.json)
-          echo "Latest versions: ${latest_versions}"
 
           jq -c '.[]' image-matrix.json | while read -r entry; do
             current_version=$(echo "$entry" | jq -r '.nodeVersion')
