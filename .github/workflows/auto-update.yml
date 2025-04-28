@@ -91,3 +91,4 @@ jobs:
             Updates the Node.js base image to version ${{ env.latest_node_version }}.
           sign-commits: true
           commit-message: "Update Node.js base image to ${{ env.latest_node_version }}"
+          team-reviewers: ${{ vars.PR_REVIEW_TEAM }}
