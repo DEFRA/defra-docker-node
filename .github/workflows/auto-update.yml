@@ -23,7 +23,6 @@ jobs:
           latest_versions=$(jq -r '[.[] | {major: (.version | ltrimstr("v") | split(".")[0] | tonumber), version: (.version | ltrimstr("v"))}] | group_by(.major) | map({(.[0].major | tostring): .[0].version}) | add' node_versions.json)
           echo "Latest versions: ${latest_versions}"
 
-          update_needed=false
           jq -c '.[]' image-matrix.json | while read -r entry; do
             current_version=$(echo "$entry" | jq -r '.nodeVersion')
             major_version=$(echo "$current_version" | cut -d. -f1)
@@ -34,7 +33,6 @@ jobs:
             image="node:${latest_version}-alpine${alpine_version}"
             if docker pull "$image" &>/dev/null; then
               if [[ "$latest_version" != "$current_version" ]]; then
-                update_needed=true
                 echo "Update needed for Node.js $major_version: $current_version -> $latest_version"
                 echo "$major_version:$latest_version:$alpine_version" >> updates.txt
               fi
@@ -43,8 +41,12 @@ jobs:
             fi
           done
 
-          echo "update_needed=${update_needed}" >> $GITHUB_ENV
-          echo "Debug: update_needed=${update_needed}"
+          # Check if updates.txt exists and is not empty
+          if [[ -s updates.txt ]]; then
+            echo "update_needed=true" >> $GITHUB_ENV
+          else
+            echo "update_needed=false" >> $GITHUB_ENV
+          fi
 
       - name: Debug update_needed
         run: |
