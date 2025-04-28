@@ -12,13 +12,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Extract supported Node.js major versions
-        id: extract-supported
-        run: |
-          supported_versions=$(jq -r '.[].nodeVersion | split(".")[0] | tonumber' image-matrix.json | sort -nu)
-          echo "supported_versions=${supported_versions}" >> $GITHUB_ENV
-          echo "Supported major versions: ${supported_versions}"
-
       - name: Fetch latest Node.js versions
         run: |
           curl -s https://nodejs.org/dist/index.json > node_versions.json
