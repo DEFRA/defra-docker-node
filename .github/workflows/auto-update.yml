@@ -15,7 +15,7 @@ jobs:
       - name: Extract supported Node.js major versions
         id: extract-supported
         run: |
-          supported_versions=$(jq -r '.[].nodeVersion | split(".")[0] | tonumber image-matrix.json | sort -nu)
+          supported_versions=$(jq -r '.[].nodeVersion | split(".")[0] | tonumber' image-matrix.json | sort -nu)
           echo "supported_versions=${supported_versions}" >> $GITHUB_ENV
           echo "Supported major versions: ${supported_versions}"
 
