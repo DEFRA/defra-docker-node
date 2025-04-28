@@ -90,3 +90,4 @@ jobs:
           body: |
             Updates the Node.js base image to version ${{ env.latest_node_version }}.
           sign-commits: true
+          commit-message: "Update Node.js base image to ${{ env.latest_node_version }}"
