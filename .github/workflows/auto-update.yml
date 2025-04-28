@@ -44,6 +44,11 @@ jobs:
           done
 
           echo "update_needed=${update_needed}" >> $GITHUB_ENV
+          echo "Debug: update_needed=${update_needed}"
+
+      - name: Debug update_needed
+        run: |
+          echo "update_needed=${{ env.update_needed }}"
 
       - name: Update files
         if: env.update_needed == 'true'
