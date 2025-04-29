@@ -61,7 +61,7 @@ jobs:
 
           # Update README.md
           while IFS=: read -r major_version latest_version alpine_version; do
-            sed -i "s/|[[:space:]]*${major_version}\.[[:digit:]]*\.[[:digit:]]*[[:space:]]*|/| ${latest_version} |/" README.md
+            sed -i -E "s/\\|[[:space:]]*${major_version}\\.[[:digit:]]*\\.[[:digit:]]*[[:space:]]*\\|[[:space:]]*${major_version}\\.[[:digit:]]*\\.[[:digit:]]*-alpine[[:digit:]]*\\.[[:digit:]]*[[:space:]]*\\|/| ${latest_version}       | ${latest_version}-alpine${alpine_version} |/" README.md
           done < updates.txt
           echo "Updated README.md"
 
