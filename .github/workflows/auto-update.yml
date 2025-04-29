@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '0 2 * * *'
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   check-and-update:
@@ -15,61 +18,86 @@ jobs:
       - name: Fetch latest Node.js versions
         run: |
           curl -s https://nodejs.org/dist/index.json > node_versions.json
-          latest_node_version=$(jq -r '[.[] | select(.lts != false)][0].version' node_versions.json)
-          echo "latest_node_version=${latest_node_version#v}" >> $GITHUB_ENV
-          rm node_versions.json
+          echo "Fetched latest Node.js versions."
 
-      - name: Extract current Alpine version
+      - name: Check for updates
+        id: check-updates
         run: |
-          current_alpine_version=$(grep -oP 'ARG BASE_VERSION=[\d.]+-alpine\K[\d.]+' Dockerfile)
-          echo "current_alpine_version=${current_alpine_version}" >> $GITHUB_ENV
+          latest_versions=$(jq -r '[.[] | {major: (.version | ltrimstr("v") | split(".")[0] | tonumber), version: (.version | ltrimstr("v"))}] | group_by(.major) | map({(.[0].major | tostring): .[0].version}) | add' node_versions.json)
 
-      - name: Check if update is needed
-        run: |
-          current_node_version=$(grep -oP 'ARG BASE_VERSION=\K[\d.]+' Dockerfile)
-          if [[ "$latest_node_version" != "$current_node_version" ]]; then
+          jq -c '.[]' image-matrix.json | while read -r entry; do
+            current_version=$(echo "$entry" | jq -r '.nodeVersion')
+            major_version=$(echo "$current_version" | cut -d. -f1)
+            latest_version=$(echo "$latest_versions" | jq -r --arg major "$major_version" '.[$major]')
+            alpine_version=$(echo "$entry" | jq -r '.alpineVersion')
+
+            # Check if the Alpine image exists
+            image="node:${latest_version}-alpine${alpine_version}"
+            if docker pull "$image" &>/dev/null; then
+              if [[ "$latest_version" != "$current_version" ]]; then
+                echo "Update needed for Node.js $major_version: $current_version -> $latest_version"
+                echo "$major_version:$latest_version:$alpine_version" >> updates.txt
+              fi
+            else
+              echo "Alpine image $image not available. Skipping update for Node.js $major_version."
+            fi
+          done
+
+          # Check if updates.txt exists and is not empty
+          if [[ -s updates.txt ]]; then
             echo "update_needed=true" >> $GITHUB_ENV
-            echo "current_node_version=${current_node_version}" >> $GITHUB_ENV
           else
             echo "update_needed=false" >> $GITHUB_ENV
           fi
 
-      - name: Check Docker image availability
-        if: env.update_needed == 'true'
-        run: |
-          image="node:${latest_node_version}-alpine${current_alpine_version}"
-          if ! docker pull "$image" &>/dev/null; then
-            echo "update_needed=false" >> $GITHUB_ENV
-            echo "Docker image $image not available. Skipping update."
-          fi
-
-      - name: Update Defra version
-        if: env.update_needed == 'true'
-        run: |
-          current_defra_version=$(grep -oP 'DEFRA_VERSION=\K[\d.]+' JOB.env)
-          new_defra_version=$(echo "$current_defra_version" | awk -F. '{print $1"."$2"."$3+1}')
-          echo "current_defra_version=${current_defra_version}" >> $GITHUB_ENV
-          echo "new_defra_version=${new_defra_version}" >> $GITHUB_ENV
-
       - name: Update files
         if: env.update_needed == 'true'
         run: |
-          # Update Dockerfile
-          sed -i "s/ARG BASE_VERSION=.*/ARG BASE_VERSION=${latest_node_version}-alpine${current_alpine_version}/" Dockerfile
-          sed -i "s/ARG DEFRA_VERSION=.*/ARG DEFRA_VERSION=${new_defra_version}/" Dockerfile
-          echo "Updated Dockerfile"
+          # Update image-matrix.json
+          while IFS=: read -r major_version latest_version alpine_version; do
+            sed -i "s/\"nodeVersion\": \"${major_version}\.[^\"]*\"/\"nodeVersion\": \"${latest_version}\"/" image-matrix.json
+          done < updates.txt
+          echo "Updated image-matrix.json"
 
           # Update README.md
-          sed -i "s/|[[:space:]]*${current_node_version}[[:space:]]*|[[:space:]]*${current_node_version}-alpine${current_alpine_version}[[:space:]]*|/| ${latest_node_version}       | ${latest_node_version}-alpine${current_alpine_version} |/" README.md
+          while IFS=: read -r major_version latest_version alpine_version; do
+            sed -i -E "s/\\|[[:space:]]*${major_version}\\.[[:digit:]]*\\.[[:digit:]]*[[:space:]]*\\|[[:space:]]*${major_version}\\.[[:digit:]]*\\.[[:digit:]]*-alpine[[:digit:]]*\\.[[:digit:]]*[[:space:]]*\\|/| ${latest_version}       | ${latest_version}-alpine${alpine_version} |/" README.md
+          done < updates.txt
           echo "Updated README.md"
 
           # Update JOB.env
+          current_defra_version=$(grep -oP 'DEFRA_VERSION=\K[\d.]+' JOB.env)
+          new_defra_version=$(echo "$current_defra_version" | awk -F. '{print $1"."$2"."$3+1}')
           sed -i "s/DEFRA_VERSION=.*/DEFRA_VERSION=${new_defra_version}/" JOB.env
           echo "Updated JOB.env"
 
-          # Update image-matrix.json
-          sed -i "s/\"nodeVersion\": \"${current_node_version}\"/\"nodeVersion\": \"${latest_node_version}\"/" image-matrix.json
-          echo "Updated image-matrix.json"
+          # Update Dockerfile
+          latest_node_version=$(jq -r '.[] | select(.tags[] == "latest") | .nodeVersion' image-matrix.json)
+          latest_alpine_version=$(jq -r '.[] | select(.tags[] == "latest") | .alpineVersion' image-matrix.json)
+          sed -i "s/ARG BASE_VERSION=.*/ARG BASE_VERSION=${latest_node_version}-alpine${latest_alpine_version}/" Dockerfile
+          sed -i "s/ARG DEFRA_VERSION=.*/ARG DEFRA_VERSION=${new_defra_version}/" Dockerfile
+          echo "Updated Dockerfile"
+
+      - name: Prepare pull request details
+        if: env.update_needed == 'true'
+        run: |
+          # Read updates.txt into an environment variable
+          updated_versions=$(cat updates.txt | awk -F: '{print $1}' | sort -u | paste -sd, -)
+
+          pull_request_title="Update Node.js base image: ${updated_versions}"
+          pull_request_body=$(cat updates.txt | awk -F: '{print "- Node " $1 ": " $2}')
+          pull_request_branch="update-node-base-image-${updated_versions//,/}"
+
+          echo "pull_request_branch=${pull_request_branch}" >> $GITHUB_ENV
+          echo "pull_request_title=${pull_request_title}" >> $GITHUB_ENV
+          echo "pull_request_body=${pull_request_body}" >> $GITHUB_ENV
+          echo "Prepared pull request details."
+
+      - name: Clean up temporary files
+        if: env.update_needed == 'true'
+        run: |
+          rm -f node_versions.json updates.txt
+          echo "Removed temporary files."
 
       - name: Generate GitHub App token
         if: env.update_needed == 'true'
@@ -84,9 +112,12 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.generate-token.outputs.token }}
-          branch: update-node-base-image-${{ env.latest_node_version }}
+          branch: ${{ env.pull_request_branch }}
           base: master
-          title: "Update Node.js base image to ${{ env.latest_node_version }}"
+          title: ${{ env.pull_request_title }}
           body: |
-            Updates the Node.js base image to version ${{ env.latest_node_version }}.
+            Updates the Node.js base images to the latest versions:
+            ${{ env.pull_request_body }}
           sign-commits: true
+          commit-message: ${{ env.pull_request_title }}
+          team-reviewers: ${{ vars.PR_REVIEW_TEAM }}
