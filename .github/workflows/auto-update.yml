@@ -33,8 +33,8 @@ jobs:
 
             # Check if the Alpine image exists
             image="node:${latest_version}-alpine${alpine_version}"
-            if docker pull "$image" &>/dev/null; then
-              if [[ "$latest_version" != "$current_version" ]]; then
+            if [[ "$latest_version" != "$current_version" ]]; then
+              if docker pull "$image" &>/dev/null; then
                 echo "Update needed for Node.js $major_version: $current_version -> $latest_version"
                 echo "$major_version:$latest_version:$alpine_version" >> updates.txt
               fi
