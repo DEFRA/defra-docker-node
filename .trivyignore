@@ -1,0 +1,2 @@
+# Issue affects Node 18 and 20 base images.  npm has been patched but these images do not yet include that update -> https://github.com/npm/cli/issues/7902
+CVE-2024-21538
