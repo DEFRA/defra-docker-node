@@ -33,7 +33,7 @@ jobs:
         id: grype-scan
         uses: anchore/scan-action@v6
         with:
-          image: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-dotnet${{matrix.image.nodeVersion}}
+          image: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-node${{matrix.image.nodeVersion}}
           fail-build: true
           severity-cutoff: "medium"
         continue-on-error: true
@@ -42,9 +42,9 @@ jobs:
         id: trivy-scan
         uses: aquasecurity/trivy-action@0.30.0
         with:
-          image-ref: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-dotnet${{matrix.image.nodeVersion}}
+          image-ref: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-node${{matrix.image.nodeVersion}}
           format: sarif
-          output: 'trivy-scan.sarif'
+          output: trivy-reports-node-${{ matrix.image.nodeVersion }}
           exit-code: 1
           vuln-type: os,library
           severity: CRITICAL,HIGH,MEDIUM
@@ -54,15 +54,15 @@ jobs:
         if: ${{ steps.grype-scan.outcome == 'failure' }}
         uses: actions/upload-artifact@v4
         with:
-          name: grype-reports-dotnet-${{ matrix.image.nodeVersion }}
+          name: grype-reports-node-${{ matrix.image.nodeVersion }}
           path: ${{ steps.grype-scan.outputs.sarif }}
 
       - name: Upload Trivy SARIF report
         if: ${{ steps.trivy-scan.outcome == 'failure' }}
         uses: actions/upload-artifact@v4
         with:
-          name: trivy-reports-dotnet-${{ matrix.image.nodeVersion }}
-          path: trivy-scan.sarif
+          name: trivy-reports-node-${{ matrix.image.nodeVersion }}
+          path: trivy-reports-node-${{ matrix.image.nodeVersion }}
 
       - name: Fail build if scans failed
         if: ${{ (steps.grype-scan.outcome == 'failure' || steps.trivy-scan.outcome == 'failure') }}
