@@ -25,20 +25,47 @@ jobs:
         image: ${{fromJSON(needs.get-matrix-values.outputs.image)}}
     steps:
       - uses: actions/checkout@v3
+
       - name: Set job environment variables
         run:  cat JOB.env >> $GITHUB_ENV
-      - name: Scan Node.js docker image
-        id: scan
-        uses: anchore/scan-action@v3
+      
+      - name: Run Anchore Grype scan
+        id: grype-scan
+        uses: anchore/scan-action@v6
         with:
-          image: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-node${{matrix.image.nodeVersion}}
+          image: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-dotnet${{matrix.image.nodeVersion}}
           fail-build: true
           severity-cutoff: "medium"
-          only-fixed: true
+        continue-on-error: true
 
-      - name: Upload Anchore Grype SARIF report
-        if: ${{ failure() }}
+      - name: Run Aqua Trivy scan
+        id: trivy-scan
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-dotnet${{matrix.image.nodeVersion}}
+          format: sarif
+          output: 'trivy-scan.sarif'
+          exit-code: 1
+          vuln-type: os,library
+          severity: CRITICAL,HIGH,MEDIUM
+        continue-on-error: true
+
+      - name: Upload Grype SARIF report
+        if: ${{ steps.grype-scan.outcome == 'failure' }}
         uses: actions/upload-artifact@v4
         with:
-          name: anchore-reports-node-${{ matrix.image.nodeVersion }}
-          path: ${{ steps.scan.outputs.sarif }}
+          name: grype-reports-dotnet-${{ matrix.image.nodeVersion }}
+          path: ${{ steps.grype-scan.outputs.sarif }}
+
+      - name: Upload Trivy SARIF report
+        if: ${{ steps.trivy-scan.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-reports-dotnet-${{ matrix.image.nodeVersion }}
+          path: trivy-scan.sarif
+
+      - name: Fail build if scans failed
+        if: ${{ (steps.grype-scan.outcome == 'failure' || steps.trivy-scan.outcome == 'failure') }}
+        run: |
+          echo "One or more scans failed. Failing the build."
+          exit 1
