@@ -3,6 +3,7 @@ name: BUILD-SCAN-PUSH
 on:
   push:
     branches: [ '**' ]
+  workflow_dispatch:
 
 jobs:
 
@@ -62,15 +63,48 @@ jobs:
           ${{steps.setImageDetails.outputs.latestTag}}
           docker images
 
-      - name: run Anchore Grype scan
-        id: scan
+      - name: Run Anchore Grype scan
+        id: grype-scan
         if: ${{ matrix.target == 'production' }}
-        uses: anchore/scan-action@v3
+        uses: anchore/scan-action@v6
         with:
           image: ${{steps.setImageDetails.outputs.fullImageName}}
           fail-build: true
           severity-cutoff: "medium"
-          only-fixed: true
+        continue-on-error: true
+
+      - name: Run Aqua Trivy scan
+        id: trivy-scan
+        if: ${{ matrix.target == 'production' }}
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: ${{steps.setImageDetails.outputs.fullImageName}}
+          format: sarif
+          output: 'trivy-scan.sarif'
+          exit-code: 1
+          vuln-type: os,library
+          severity: CRITICAL,HIGH,MEDIUM
+        continue-on-error: true
+
+      - name: Upload Grype SARIF report
+        if: ${{ steps.grype-scan.outcome == 'failure' && matrix.target == 'production' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: grype-reports-dotnet-${{ matrix.image.netVersion }}
+          path: ${{ steps.grype-scan.outputs.sarif }}
+
+      - name: Upload Trivy SARIF report
+        if: ${{ steps.trivy-scan.outcome == 'failure' && matrix.target == 'production' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-reports-dotnet-${{ matrix.image.netVersion }}
+          path: trivy-scan.sarif
+
+      - name: Fail build if scans failed
+        if: ${{ (steps.grype-scan.outcome == 'failure' || steps.trivy-scan.outcome == 'failure') && matrix.target == 'production' }}
+        run: |
+          echo "One or more scans failed. Failing the build."
+          exit 1
 
       - name: Tag image
         run: |
@@ -97,10 +131,3 @@ jobs:
           do
             docker image push ${{steps.setImageDetails.outputs.dockerRepoName}}:$TAG
           done
-
-      - name: Upload Anchore Grype SARIF report
-        if: ${{ failure() && matrix.target == 'production' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: anchore-reports-node-${{ matrix.image.nodeVersion }}
-          path: ${{ steps.scan.outputs.sarif }}
