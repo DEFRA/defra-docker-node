@@ -137,6 +137,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           current_defra_version=$(grep -oP 'DEFRA_VERSION=\K[\d.]+' JOB.env)
-          gh release create current_defra_version \
+
+          if gh release view "$current_defra_version" &>/dev/null; then
+            echo "Tag $current_defra_version already exists. Skipping release."
+          else
+            gh release create current_defra_version \
             --title "$current_defra_version" \
             --generate-notes 
+          fi
