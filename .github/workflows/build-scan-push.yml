@@ -131,3 +131,12 @@ jobs:
           do
             docker image push ${{steps.setImageDetails.outputs.dockerRepoName}}:$TAG
           done
+
+      - name: Create GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          current_defra_version=$(grep -oP 'DEFRA_VERSION=\K[\d.]+' JOB.env)
+          gh release create current_defra_version \
+            --title "$current_defra_version" \
+            --generate-notes
