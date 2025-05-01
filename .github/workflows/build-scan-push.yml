@@ -138,10 +138,10 @@ jobs:
         run: |
           current_defra_version=$(grep -oP 'DEFRA_VERSION=\K[\d.]+' JOB.env)
 
-          if gh release view "$current_defra_version" &>/dev/null; then
+          if gh release view $current_defra_version &>/dev/null; then
             echo "Tag $current_defra_version already exists. Skipping release."
           else
-            gh release create current_defra_version \
+            gh release create $current_defra_version \
             --title "$current_defra_version" \
             --generate-notes 
           fi
