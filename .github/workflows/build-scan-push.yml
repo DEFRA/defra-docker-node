@@ -139,4 +139,4 @@ jobs:
           current_defra_version=$(grep -oP 'DEFRA_VERSION=\K[\d.]+' JOB.env)
           gh release create current_defra_version \
             --title "$current_defra_version" \
-            --generate-notes
+            --generate-notes 
