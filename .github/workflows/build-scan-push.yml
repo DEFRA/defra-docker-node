@@ -151,6 +151,6 @@ jobs:
           echo "Tag $current_defra_version already exists. Skipping release."
         else
           gh release create $current_defra_version \
-          --title "$current_defra_version" \
+          --title "Node $current_defra_version" \
           --generate-notes 
         fi
