@@ -1,6 +1,14 @@
-# Docker Node
+![Build](https://github.com/defra/defra-docker-node/actions/workflows/build-scan-push.yml/badge.svg)
+![Nightly Scan](https://github.com/defra/defra-docker-node/actions/workflows/nightly-scan.yml/badge.svg)
+![Auto Update](https://github.com/defra/defra-docker-node/actions/workflows/auto-update.yml/badge.svg)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_defra-docker-node&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DEFRA_defra-docker-node)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_defra-docker-node&metric=bugs)](https://sonarcloud.io/summary/new_code?id=DEFRA_defra-docker-node)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_defra-docker-node&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=DEFRA_defra-docker-node)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_defra-docker-node&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=DEFRA_defra-docker-node)
 
-This repository contains Node parent Docker image source code for Defra.
+# Docker Node.js
+
+This repository contains Node.js parent Docker image source code for Defra.
 
 The following table lists the versions of node available, and the parent Node.js image they are based on:
 
@@ -18,6 +26,18 @@ Two parent images are created for each version:
 It is recommended that services use [multi-stage builds](https://docs.docker.com/develop/develop-images/multistage-build) to produce production and development images, each extending the appropriate parent, from a single Dockerfile.
 
 [Examples](https://github.com/DEFRA/defra-docker-node/tree/master/examples) are provided to show how parent images can be extended for different types of services. These should be a good starting point for building Node services conforming to Defra standards.
+
+## Supported Node.js versions
+
+Services should use the latest LTS version of Node.js.
+
+As such, the maintained parent images will align to the versions of LTS still receiving security updates.
+
+## Example files
+
+`Dockerfile.web` - This is an example web project, that requires a build step to create some static files that are used by the web front end.
+
+`Dockerfile.service` - This is an example project that doesn't expose any external ports (a message based service). There is also no build step in this Dockerfile.
 
 ## Building images locally
 
@@ -39,12 +59,6 @@ Images should be tagged according to the Dockerfile version and the version of N
 
 Any new features or changes to supported Node or Alpine versions will be published as `minor` version updates.  Any breaking changes to dependencies or how images can be consumed will be published as `major` updates.
 
-## Example files
-
-`Dockerfile.web` - This is an example web project, that requires a build step to create some static files that are used by the web front end.
-
-`Dockerfile.service` - This is an example project that doesn't expose any external ports (a message based service). There is also no build step in this Dockerfile.
-
 ## CI/CD
 
 On commit GitHub Actions will build both `node` and `node-development` images for the Node.js versions listed in the [image-matrix.json](image-matrix.json) file, and perform a vulnerability scan as described below.
@@ -55,11 +69,19 @@ In addition to the version, the images will also be tagged with the contents of 
 
 ## Image vulnerability scanning
 
-A GitHub Action runs a nightly Anchore Grype scan of the image published to Docker, and will build and scan pre-release images on push. At present the latest Node.js 18, 20 and 22 images are scanned.
+A GitHub Action runs a nightly scan of the images published to Docker using [Anchore Grype](https://github.com/anchore/grype/) and [Aqua Trivy](https://www.aquasec.com/products/trivy/). The latest images for each supported Node.js version are scanned.
+
+New images are also scanned before release on any push to a branch.
 
 This ensures Defra services that use the parent images are starting from a known secure foundation, and can limit patching to only newly added libraries.
 
 For more details see [Image Scanning](IMAGE_SCANNING.md)
+
+## Automated version updates
+
+THe [auto-update](/.github/workflows/auto-update.yml) workflow runs nightly to check for new versions of Node.js and their associated Alpine images. If a new version is found, the workflow will create a pull request to update to the latest version.
+
+These updates are scoped to the Node.js versions listed in the [image-matrix.json](image-matrix.json) file.
 
 ## Convenience script
 

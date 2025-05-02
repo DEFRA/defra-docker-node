@@ -6,13 +6,13 @@ FROM defra-node:$BASE_VERSION AS base
 
 # Set the port that is going to be exposed later on in the Dockerfile as well.
 ARG PORT=3000
-ENV PORT ${PORT}
+ENV PORT=${PORT}
 
 # Copy our package files so that our package install will do a clean install. This installs the exact versions of the packages
 #   listed in package-lock.json, and does not update either the package-lock.json or the package.json file.
 # Our production dependencies are now installed.
 COPY --chown=node:node package*.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 # Development stage installs devDependencies, builds app from source and declares a file watcher as the default command.
 #   We name this stage so we can refer to it in later stages
