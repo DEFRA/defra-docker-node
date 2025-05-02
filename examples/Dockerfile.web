@@ -25,7 +25,7 @@ EXPOSE ${PORT} 9229
 COPY --from=base --chown=node:node /home/node/package*.json ./
 
 # We run a full dev install to bring in any development packages
-RUN npm install --production=false
+RUN npm install --production=false --ignore-scripts
 COPY --chown=node:node app/ ./app/
 
 # Run the build command to get the extra files needed for production. We also specify a command here,
