@@ -90,7 +90,9 @@ jobs:
 
           echo "pull_request_branch=${pull_request_branch}" >> $GITHUB_ENV
           echo "pull_request_title=${pull_request_title}" >> $GITHUB_ENV
-          echo "pull_request_body=${pull_request_body}" >> $GITHUB_ENV
+          echo "pull_request_body<<EOF" >> $GITHUB_OUTPUT
+          echo "$pull_request_body" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
           echo "Prepared pull request details."
 
       - name: Clean up temporary files
@@ -117,7 +119,7 @@ jobs:
           title: ${{ env.pull_request_title }}
           body: |
             Updates the Node.js base images to the latest versions:
-            ${{ env.pull_request_body }}
+            ${{ steps.pr-details.outputs.pull_request_body }}
           sign-commits: true
           commit-message: ${{ env.pull_request_title }}
           team-reviewers: ${{ vars.PR_REVIEW_TEAM }}
