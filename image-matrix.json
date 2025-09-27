@@ -1,5 +1,5 @@
  [
     {"nodeVersion": "20.19.5", "alpineVersion": "3.21", "tags": ["latest-20"]},
-    {"nodeVersion": "22.19.0", "alpineVersion": "3.21", "tags": ["latest-22", "latest"]},
-    {"nodeVersion": "24.8.0", "alpineVersion": "3.21", "tags": ["latest-24"]}
+    {"nodeVersion": "22.20.0", "alpineVersion": "3.21", "tags": ["latest-22", "latest"]},
+    {"nodeVersion": "24.9.0", "alpineVersion": "3.21", "tags": ["latest-24"]}
 ]
