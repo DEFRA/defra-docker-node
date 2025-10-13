@@ -14,9 +14,9 @@ The following table lists the versions of node available, and the parent Node.js
 
 | Node version  | Parent image       |
 | ------------- | -----------------  |
-| 20.19.5       | 20.19.5-alpine3.21 |
-| 22.20.0       | 22.20.0-alpine3.21 |
-| 24.10.0       | 24.10.0-alpine3.21 |
+| 20.19.5       | 20.19.5-alpine3.22 |
+| 22.20.0       | 22.20.0-alpine3.22 |
+| 24.10.0       | 24.10.0-alpine3.22 |
 
 Two parent images are created for each version:
 
