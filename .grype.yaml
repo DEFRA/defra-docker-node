@@ -1,6 +1,5 @@
 ignore:
   - vulnerability: GHSA-3xgq-45jj-v275
     reason: "Node 20: No fix"
-  # - vulnerability: CVE-2024-21538
   - vulnerability: GHSA-29xp-372q-xqph
     reason: "Node 24: Node-tar patched but not yet available in Node.js base images"
