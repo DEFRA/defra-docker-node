@@ -3,3 +3,6 @@ CVE-2024-21538
 
 # brace-expansion ReDoS vulnerability in npm dependency. Fixed in brace-expansion 2.0.2+ but not yet available in npm, however is in progress -> https://github.com/nodejs/node/pull/58712
 CVE-2025-5889
+
+# node-tar patched but not yet available in Node.js base images
+CVE-2025-64118
