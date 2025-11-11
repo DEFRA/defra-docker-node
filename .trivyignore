@@ -1,4 +1,4 @@
-# Node 20: brace-expansion ReDoS vulnerability in npm dependency. Fixed in brace-expansion 2.0.2+ but not yet available in npm, however is in progress -> https://github.com/nodejs/node/pull/58712
+# Node 20: brace-expansion ReDoS vulnerability in npm dependency. Fixed in brace-expansion 2.0.2+ but not yet available in Node 20
 CVE-2025-5889
 
 # Node 24: node-tar patched but not yet available in Node.js base images
