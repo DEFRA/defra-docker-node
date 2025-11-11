@@ -109,7 +109,7 @@ jobs:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - name: Render template
+      - name: Render PR template
         id: template
         uses: chuhlomin/render-template@v1
         with:
