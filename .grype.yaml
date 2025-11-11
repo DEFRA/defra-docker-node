@@ -1,4 +1,4 @@
 ignore:
   - vulnerability: GHSA-3xgq-45jj-v275
   - vulnerability: CVE-2024-21538
-  - vulnerability: GHSA-29xp-372q-xqph-tar
+  - vulnerability: GHSA-29xp-372q-xqph
