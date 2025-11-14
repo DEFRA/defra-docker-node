@@ -55,9 +55,28 @@ jobs:
             echo "latestTag=" >> $GITHUB_OUTPUT
           fi
 
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4
+        with:
+          daemon-config: |
+            {
+              "debug": true,
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build the Docker image
         run: |
-          docker build . --file Dockerfile --no-cache \
+          docker buildx build . --file Dockerfile --no-cache \
+          --platform linux/amd64,linux/arm64 \
+          --load \
           --target=${{matrix.target}} \
           --build-arg DEFRA_VERSION=$DEFRA_VERSION \
           --build-arg BASE_VERSION=${{matrix.image.nodeVersion}}-alpine${{matrix.image.alpineVersion}} \
