@@ -84,12 +84,18 @@ jobs:
           ${{steps.setImageDetails.outputs.latestTag}}
           docker images
 
+      - name: Save image to archive
+        if: ${{ matrix.target == 'production' }}
+        run: |
+          docker save ${{steps.setImageDetails.outputs.fullImageName}} -o image-${{ matrix.image.nodeVersion }}.tar
+          ls -lh image-${{ matrix.image.nodeVersion }}.tar
+
       - name: Run Anchore Grype scan
         id: grype-scan
         if: ${{ matrix.target == 'production' }}
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
-          image: ${{steps.setImageDetails.outputs.fullImageName}}
+          image: docker-archive:image-${{ matrix.image.nodeVersion }}.tar
           fail-build: true
           severity-cutoff: "medium"
         continue-on-error: true
@@ -97,9 +103,10 @@ jobs:
       - name: Run Aqua Trivy scan
         id: trivy-scan
         if: ${{ matrix.target == 'production' }}
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@0.33.1
         with:
-          image-ref: ${{steps.setImageDetails.outputs.fullImageName}}
+          input: image-${{ matrix.image.nodeVersion }}.tar
+          scan-type: image
           format: sarif
           output: trivy-reports-node-${{ matrix.image.nodeVersion }}
           exit-code: 1
@@ -125,6 +132,8 @@ jobs:
         if: ${{ (steps.grype-scan.outcome == 'failure' || steps.trivy-scan.outcome == 'failure') && matrix.target == 'production' }}
         run: |
           echo "One or more scans failed. Failing the build."
+          echo "Grype scan outcome: ${{ steps.grype-scan.outcome }}"
+          echo "Trivy scan outcome: ${{ steps.trivy-scan.outcome }}"
           exit 1
 
       - name: Tag image
