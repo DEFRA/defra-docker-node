@@ -87,7 +87,7 @@ jobs:
       - name: Run Anchore Grype scan
         id: grype-scan
         if: ${{ matrix.target == 'production' }}
-        uses: anchore/scan-action@v7
+        uses: anchore/scan-action@v6
         with:
           image: ${{steps.setImageDetails.outputs.fullImageName}}
           fail-build: true
