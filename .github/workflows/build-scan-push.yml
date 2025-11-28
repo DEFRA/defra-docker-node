@@ -89,7 +89,7 @@ jobs:
         if: ${{ matrix.target == 'production' }}
         uses: anchore/scan-action@v7
         with:
-          image: ${{steps.setImageDetails.outputs.fullImageName}}
+          image: docker-daemon:${{steps.setImageDetails.outputs.fullImageName}}
           fail-build: true
           severity-cutoff: "medium"
         continue-on-error: true
@@ -99,7 +99,7 @@ jobs:
         if: ${{ matrix.target == 'production' }}
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          image-ref: ${{steps.setImageDetails.outputs.fullImageName}}
+          image-ref: docker-daemon:${{steps.setImageDetails.outputs.fullImageName}}
           format: sarif
           output: trivy-reports-node-${{ matrix.image.nodeVersion }}
           exit-code: 1
