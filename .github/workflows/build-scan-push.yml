@@ -125,6 +125,8 @@ jobs:
         if: ${{ (steps.grype-scan.outcome == 'failure' || steps.trivy-scan.outcome == 'failure') && matrix.target == 'production' }}
         run: |
           echo "One or more scans failed. Failing the build."
+          echo "Grype scan outcome: ${{ steps.grype-scan.outcome }}"
+          echo "Trivy scan outcome: ${{ steps.trivy-scan.outcome }}"
           exit 1
 
       - name: Tag image
