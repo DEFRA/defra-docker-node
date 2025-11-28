@@ -97,7 +97,7 @@ jobs:
       - name: Run Aqua Trivy scan
         id: trivy-scan
         if: ${{ matrix.target == 'production' }}
-        uses: aquasecurity/trivy-action@0
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: ${{steps.setImageDetails.outputs.fullImageName}}
           format: sarif
