@@ -93,7 +93,7 @@ jobs:
       - name: Run Anchore Grype scan
         id: grype-scan
         if: ${{ matrix.target == 'production' }}
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           image: docker-archive:image-${{ matrix.image.nodeVersion }}.tar
           fail-build: true
