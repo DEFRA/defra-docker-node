@@ -9,3 +9,6 @@ CVE-2025-64118
 
 # Node 20: Node-glob patched but not yet available in Node.js base images, issue not exploitable in npm context
 CVE-2025-64756
+
+# Alpine: BusyBox vulnerability, no fix available
+CVE-2024-58251
