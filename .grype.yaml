@@ -7,3 +7,5 @@ ignore:
     reason: "Node 24: Node-tar patched but not yet available in Node.js base images"
   - vulnerability: GHSA-5j98-mcp5-4vw2
     reason: "Node 20: Node-glob patched but not yet available in Node.js base images, issue not exploitable in npm context"
+  - vulnerability: CVE-2025-60876
+    reason: "Alpine BusyBox: No fix available"
