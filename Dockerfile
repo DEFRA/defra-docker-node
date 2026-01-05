@@ -1,5 +1,5 @@
 # Set default values for build arguments
-ARG DEFRA_VERSION=2.11.0
+ARG DEFRA_VERSION=3.0.0
 ARG BASE_VERSION=24.12.0-alpine3.23
 
 FROM node:$BASE_VERSION AS production
@@ -45,9 +45,5 @@ USER root
 
 # node-gyp is a common requirement for NPM packages.
 RUN apk add --no-cache bash 'g++' git make 'python3'
-# Pact contract testing
-ADD https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub /etc/apk/keys/sgerrand.rsa.pub
-ADD https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r1/glibc-2.35-r1.apk glibc-2.35-r1.apk
-RUN apk add --no-cache glibc-2.35-r1.apk
 
 USER node
