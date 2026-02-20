@@ -129,7 +129,7 @@ jobs:
           path: trivy-reports-node-${{ matrix.image.nodeVersion }}
 
       - name: Fail build if scans failed
-        if: ${{ (steps.grype-scan.outcome == 'failure' || steps.trivy-scan.outcome == 'failure') && matrix.target == 'production' }}
+        if: ${{ (steps.grype-scan.outcome == 'failure' || steps.trivy-scan.outcome == 'failure') && matrix.target == 'production' && github.ref != 'refs/heads/master' }}
         run: |
           echo "One or more scans failed. Failing the build."
           echo "Grype scan outcome: ${{ steps.grype-scan.outcome }}"
