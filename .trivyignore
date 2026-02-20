@@ -6,6 +6,8 @@ CVE-2024-21538
 
 # Node 24: node-tar patched but not yet available in Node.js base images
 CVE-2025-64118
+CVE-2026-24842
+CVE-2026-26960
 
 # Node 20: Node-glob patched but not yet available in Node.js base images, issue not exploitable in npm context
 CVE-2025-64756
@@ -15,3 +17,9 @@ CVE-2024-58251
 
 # Alpine: SSL client, no fix available
 CVE-2025-46394
+
+# Node 24: brace-expansion patched but not yet available in Node.js base images
+CVE-2026-25547
+
+# Node 24: minimatch patched but not yet available in Node.js base images
+CVE-2026-26996
