@@ -25,3 +25,6 @@ CVE-2026-25547
 
 # Node 24: minimatch patched but not yet available in Node.js base images
 CVE-2026-26996
+
+# Node 22: jsdiff patched but not yet available in Node.js base images
+CVE-2026-24001
