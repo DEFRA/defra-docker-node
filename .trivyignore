@@ -9,6 +9,7 @@ CVE-2025-64118
 CVE-2026-24842
 CVE-2026-26960
 CVE-2026-23745
+CVE-2026-23950
 
 # Node 20: Node-glob patched but not yet available in Node.js base images, issue not exploitable in npm context
 CVE-2025-64756
