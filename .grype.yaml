@@ -23,3 +23,5 @@ ignore:
     reason: "Node 20,22: brace-expansion patched but not yet available in Node.js base images"
   - vulnerability: GHSA-3ppc-4f35-3m26
     reason: "Node 22: minimatch patched but not yet available in Node.js base images"
+  - vulnerability: CVE-2026-27171
+    reason: "Alpine zlib: No fix available"
