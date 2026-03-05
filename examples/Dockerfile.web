@@ -1,7 +1,7 @@
 # This assumes that the parent image has been built locally using production and development build configuration as defra-node 
 # and defra-node-development tagged with a version.
 
-ARG BASE_VERSION=2.5.2-node22.14.0
+ARG BASE_VERSION=2.10.3-node24.12.0
 FROM defra-node:$BASE_VERSION AS base
 
 # Set the port that is going to be exposed later on in the Dockerfile as well.
@@ -53,10 +53,14 @@ WORKDIR /home/node
 EXPOSE ${PORT}
 
 # Copy in the files that we built using the tools in the development stage. The final production stage will have the built files,
-#   but none of the tools required to build those files. This reduces the attack surface, and also the size of the final production image
-COPY --from=development /home/node/app/ ./app/
+# but none of the tools required to build those files. This reduces the attack surface, and also the size of the final production image
+COPY --from=development --chown=root:root /home/node/package*.json ./
+COPY --from=development --chown=root:root /home/node/app/ ./app/
+
+# Install node modules and remove write permissions.
+RUN npm ci --ignore-scripts --omit=dev && chmod -R a-w /home/node
 
 # This is the command that is run for the production service. The parent image has an ENTRYPOINT that uses a lightweight
-#   init program "tini" that handles signals. As long as we don't override the ENTRYPOINT the "tini" routine will handle signals and
-#   orphaned processes
+# init program "tini" that handles signals. As long as we don't override the ENTRYPOINT the "tini" routine will handle signals and
+# orphaned processes
 CMD [ "node", "app/index" ]
