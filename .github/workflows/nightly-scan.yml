@@ -40,7 +40,7 @@ jobs:
 
       - name: Run Aqua Trivy scan
         id: trivy-scan
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-node${{matrix.image.nodeVersion}}
           format: sarif

@@ -103,7 +103,7 @@ jobs:
       - name: Run Aqua Trivy scan
         id: trivy-scan
         if: ${{ matrix.target == 'production' }}
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           input: image-${{ matrix.image.nodeVersion }}.tar
           scan-type: image

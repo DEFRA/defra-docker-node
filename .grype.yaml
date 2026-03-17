@@ -25,3 +25,11 @@ ignore:
     reason: "Node 22: minimatch patched but not yet available in Node.js base images"
   - vulnerability: CVE-2026-27171
     reason: "Alpine zlib: No fix available"
+  - vulnerability: GHSA-7r86-cg39-jmmj
+    reason: "Node 24: minimatch patched but not yet available in Node.js base images"
+  - vulnerability: GHSA-23c5-xmqv-rm74
+    reason: "Node 24: minimatch patched but not yet available in Node.js base images"
+  - vulnerability: GHSA-qffp-2rhf-9h96
+    reason: "Node 24: tar patched but not yet available in Node.js base images"
+  - vulnerability: GHSA-9ppj-qmqm-q256
+    reason: "Node 24: tar patched but not yet available in Node.js base images"
