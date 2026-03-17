@@ -31,3 +31,5 @@ ignore:
     reason: "Node 24: minimatch patched but not yet available in Node.js base images"
   - vulnerability: GHSA-qffp-2rhf-9h96
     reason: "Node 24: tar patched but not yet available in Node.js base images"
+  - vulnerability: GHSA-9ppj-qmqm-q256
+    reason: "Node 24: tar patched but not yet available in Node.js base images"
