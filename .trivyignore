@@ -10,6 +10,8 @@ CVE-2026-24842
 CVE-2026-26960
 CVE-2026-23745
 CVE-2026-23950
+CVE-2026-29786
+CVE-2026-31802
 
 # Node 20: Node-glob patched but not yet available in Node.js base images, issue not exploitable in npm context
 CVE-2025-64756
@@ -25,6 +27,12 @@ CVE-2026-25547
 
 # Node 24: minimatch patched but not yet available in Node.js base images
 CVE-2026-26996
+CVE-2026-27903
+CVE-2026-27904
 
 # Node 22: jsdiff patched but not yet available in Node.js base images
 CVE-2026-24001
+
+# Alpine: zlib vulnerability, no fix available
+CVE-2026-22184
+CVE-2026-27171
