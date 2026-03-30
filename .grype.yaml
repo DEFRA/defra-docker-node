@@ -37,3 +37,5 @@ ignore:
     reason: "Alpine libcrypto: No fix available"
   - vulnerability: Vulnerability GHSA-c2c7-rcm5-vvqj
     reason: "Node 22: picomatch patched but not yet available in Node.js base images"
+  - vulnerability: GHSA-f886-m6hf-6m8v
+    reason: "Node 20: brace-expansion patched but not yet available in Node.js base images"
