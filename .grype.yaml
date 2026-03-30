@@ -35,3 +35,5 @@ ignore:
     reason: "Node 24: tar patched but not yet available in Node.js base images"
   - vulnerability: CVE-2026-2673
     reason: "Alpine libcrypto: No fix available"
+  - vulnerability: Vulnerability GHSA-c2c7-rcm5-vvqj
+    reason: "Node 22: picomatch patched but not yet available in Node.js base images"
