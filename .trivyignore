@@ -24,6 +24,7 @@ CVE-2025-46394
 
 # Node 24: brace-expansion patched but not yet available in Node.js base images
 CVE-2026-25547
+CVE-2026-33750
 
 # Node 24: minimatch patched but not yet available in Node.js base images
 CVE-2026-26996
@@ -36,3 +37,7 @@ CVE-2026-24001
 # Alpine: zlib vulnerability, no fix available
 CVE-2026-22184
 CVE-2026-27171
+
+# Node 22: picomatch patched but not yet available in Node.js base images
+CVE-2026-33671
+CVE-2026-33672
