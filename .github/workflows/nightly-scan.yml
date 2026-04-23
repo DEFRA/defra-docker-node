@@ -10,7 +10,7 @@ jobs:
     outputs:
       image: ${{ steps.set-var.outputs.image }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - id: set-var
         run: |
           echo 'image<<EOF' >> $GITHUB_OUTPUT
@@ -24,7 +24,7 @@ jobs:
       matrix:
         image: ${{fromJSON(needs.get-matrix-values.outputs.image)}}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
       - name: Set job environment variables
         run:  cat JOB.env >> $GITHUB_ENV
