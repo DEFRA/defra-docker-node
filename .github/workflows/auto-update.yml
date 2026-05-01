@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   check-and-update:
@@ -121,7 +121,7 @@ jobs:
         with:
           token: ${{ steps.generate-token.outputs.token }}
           branch: ${{ env.pull_request_branch }}
-          base: master
+          base: main
           title: ${{ env.pull_request_title }}
           body: |
             Updates the Node.js base images to the latest versions:

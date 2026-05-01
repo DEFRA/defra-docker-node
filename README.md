@@ -27,7 +27,7 @@ It is recommended that services use [multi-stage builds](https://docs.docker.com
 
 ### Example files
 
-[Examples](https://github.com/DEFRA/defra-docker-node/tree/master/examples) are provided to show how parent images can be extended for different types of services. These should be a good starting point for building Node services conforming to Defra standards.
+[Examples](https://github.com/DEFRA/defra-docker-node/tree/main/examples) are provided to show how parent images can be extended for different types of services. These should be a good starting point for building Node services conforming to Defra standards.
 
 `Dockerfile.web` - This is an example web project, that requires a build step to create some static files that are used by the web front end.
 
@@ -53,7 +53,7 @@ Any new features or changes to supported Node or Alpine versions will be publish
 
 On commit GitHub Actions will build both `node` and `node-development` images for the Node.js versions listed in the [image-matrix.json](image-matrix.json) file, and perform a vulnerability scan as described below.
 
-In addition a commit to the master branch will push the images to the [defradigital](https://hub.docker.com/u/defradigital) organisation in Docker Hub using the version tag specified in the [JOB.env](JOB.env) file. This version tag is expected to be manually updated on each release.
+In addition a commit to the main branch will push the images to the [defradigital](https://hub.docker.com/u/defradigital) organisation in Docker Hub using the version tag specified in the [JOB.env](JOB.env) file. This version tag is expected to be manually updated on each release.
 
 In addition to the version, the images will also be tagged with the contents of the `tags` array from [image-matrix.json](image-matrix.json) when pushed to Docker Hub.
 

@@ -3,7 +3,7 @@
 
 The repository runs a vulnerability scan of the latest Docker hub parent image nightly, and the 'work in progress' image on push to a branch via the GitHub actions workflows [nightly-scan.yml](.github/workflows/nightly-scan.yml) and [scan-on-commit.yml](.github/workflows/scan-on-commit.yml) respectively.
 
-Scheduled actions only run on the `master` repository branch so will run once, regardless of the number of branches.
+Scheduled actions only run on the `main` repository branch so will run once, regardless of the number of branches.
 
 Both workflows read settings from the file [JOB.env](JOB.env) to ensure the same Node.js, Alpine, and Defra versions are used during the image scan.
 
