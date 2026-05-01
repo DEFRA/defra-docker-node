@@ -1,0 +1,6 @@
+# Node: 22,24: brace-expansion patched but not yet available in Node.js base images
+CVE-2026-33750
+
+# Node: 22,24: picomatch patched but not yet available in Node.js base images
+CVE-2026-33671
+CVE-2026-33672
