@@ -1,43 +1,6 @@
-# Node 20: brace-expansion ReDoS vulnerability in npm dependency. Fixed in brace-expansion 2.0.2+ but not yet available in Node 20
-CVE-2025-5889
-
-# Node 20: npm patched but not yet available in Node 20 base images
-CVE-2024-21538
-
-# Node 24: node-tar patched but not yet available in Node.js base images
-CVE-2025-64118
-CVE-2026-24842
-CVE-2026-26960
-CVE-2026-23745
-CVE-2026-23950
-CVE-2026-29786
-CVE-2026-31802
-
-# Node 20: Node-glob patched but not yet available in Node.js base images, issue not exploitable in npm context
-CVE-2025-64756
-
-# Alpine: BusyBox vulnerability, no fix available
-CVE-2024-58251
-
-# Alpine: SSL client, no fix available
-CVE-2025-46394
-
-# Node 24: brace-expansion patched but not yet available in Node.js base images
-CVE-2026-25547
+# Node: 22,24: brace-expansion patched but not yet available in Node.js base images
 CVE-2026-33750
 
-# Node 24: minimatch patched but not yet available in Node.js base images
-CVE-2026-26996
-CVE-2026-27903
-CVE-2026-27904
-
-# Node 22: jsdiff patched but not yet available in Node.js base images
-CVE-2026-24001
-
-# Alpine: zlib vulnerability, no fix available
-CVE-2026-22184
-CVE-2026-27171
-
-# Node 22: picomatch patched but not yet available in Node.js base images
+# Node: 22,24: picomatch patched but not yet available in Node.js base images
 CVE-2026-33671
 CVE-2026-33672
