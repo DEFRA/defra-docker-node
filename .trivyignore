@@ -1,4 +1,4 @@
-# Node 20: brace-expansion ReDoS vulnerability in npm dependency. Fixed in brace-expansion 2.0.2+ but not yet available in Node 20
+<!-- # Node 20: brace-expansion ReDoS vulnerability in npm dependency. Fixed in brace-expansion 2.0.2+ but not yet available in Node 20
 CVE-2025-5889
 
 # Node 20: npm patched but not yet available in Node 20 base images
@@ -40,4 +40,4 @@ CVE-2026-27171
 
 # Node 22: picomatch patched but not yet available in Node.js base images
 CVE-2026-33671
-CVE-2026-33672
+CVE-2026-33672 -->
