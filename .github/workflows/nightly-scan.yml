@@ -10,7 +10,7 @@ jobs:
     outputs:
       image: ${{ steps.set-var.outputs.image }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
       - id: set-var
         run: |
           echo 'image<<EOF' >> $GITHUB_OUTPUT
@@ -24,14 +24,14 @@ jobs:
       matrix:
         image: ${{fromJSON(needs.get-matrix-values.outputs.image)}}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
       - name: Set job environment variables
         run:  cat JOB.env >> $GITHUB_ENV
       
       - name: Run Anchore Grype scan
         id: grype-scan
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@1638637db639e0ade3258b51db49a9a137574c3e # v6
         with:
           image: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-node${{matrix.image.nodeVersion}}
           fail-build: true
@@ -52,14 +52,14 @@ jobs:
 
       - name: Upload Grype SARIF report
         if: ${{ steps.grype-scan.outcome == 'failure' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: grype-reports-node-${{ matrix.image.nodeVersion }}
           path: ${{ steps.grype-scan.outputs.sarif }}
 
       - name: Upload Trivy SARIF report
         if: ${{ steps.trivy-scan.outcome == 'failure' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: trivy-reports-node-${{ matrix.image.nodeVersion }}
           path: trivy-reports-node-${{ matrix.image.nodeVersion }}
