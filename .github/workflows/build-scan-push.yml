@@ -132,9 +132,32 @@ jobs:
       - name: Fail build if scans failed
         if: ${{ (steps.grype-scan.outcome == 'failure' || steps.trivy-scan.outcome == 'failure') && matrix.target == 'production' && github.ref != 'refs/heads/main' }}
         run: |
-          echo "One or more scans failed. Failing the build."
-          echo "Grype scan outcome: ${{ steps.grype-scan.outcome }}"
-          echo "Trivy scan outcome: ${{ steps.trivy-scan.outcome }}"
+          echo "## Scan Results" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.grype-scan.outcome }}" == "failure" ]; then
+            echo "### Grype Vulnerabilities" >> $GITHUB_STEP_SUMMARY
+            echo "| Severity | CVE | Package | Details |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|-----|---------|---------|" >> $GITHUB_STEP_SUMMARY
+            jq -r '.runs[].results[] | "| \(.level) | \(.ruleId) | \(.message.text | split("\n")[0]) | \(.message.text | split("\n")[1:3] | join(", ")) |"' \
+              "${{ steps.grype-scan.outputs.sarif }}" >> $GITHUB_STEP_SUMMARY
+            echo "::group::Grype Vulnerabilities"
+            jq -r '.runs[].results[] | "\(.level)\t\(.ruleId)\t\(.message.text)"' \
+              "${{ steps.grype-scan.outputs.sarif }}"
+            echo "::endgroup::"
+          fi
+
+          if [ "${{ steps.trivy-scan.outcome }}" == "failure" ]; then
+            echo "### Trivy Vulnerabilities" >> $GITHUB_STEP_SUMMARY
+            echo "| Severity | CVE | Package | Details |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|-----|---------|---------|" >> $GITHUB_STEP_SUMMARY
+            jq -r '.runs[].results[] | "| \(.level) | \(.ruleId) | \(.message.text | split("\n")[0]) | \(.message.text | split("\n")[1:3] | join(", ")) |"' \
+              "trivy-reports-node-${{ matrix.image.nodeVersion }}" >> $GITHUB_STEP_SUMMARY
+            echo "::group::Trivy Vulnerabilities"
+            jq -r '.runs[].results[] | "\(.level)\t\(.ruleId)\t\(.message.text)"' \
+              "trivy-reports-node-${{ matrix.image.nodeVersion }}"
+            echo "::endgroup::"
+          fi
+
           exit 1
 
       - name: Tag image
