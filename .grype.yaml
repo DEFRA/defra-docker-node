@@ -7,3 +7,7 @@ ignore:
     reason: "Node: 22,24: picomatch patched but not yet available in Node.js base images"
   - vulnerability: GHSA-f886-m6hf-6m8v
     reason: "Node: 22,24: brace-expansion patched but not yet available in Node.js base images"
+  - vulnerability: GHSA-v2v4-37r5-5v8g
+    reason: "Node: 22,24: ip-address patched but not yet available in Node.js base images"
+  - vulnerability: GHSA-jxxr-4gwj-5jf2
+    reason: "Node: 24: brace-expansion patched but not yet available in Node.js base images"
