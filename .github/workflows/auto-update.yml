@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
       - name: Fetch latest Node.js versions
         run: |
@@ -104,20 +104,20 @@ jobs:
       - name: Generate GitHub App token
         if: env.update_needed == 'true'
         id: generate-token
-        uses: tibdex/github-app-token@v2
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2
         with:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Render PR template
         id: template
-        uses: chuhlomin/render-template@v1
+        uses: chuhlomin/render-template@a7c644e341797d050d1cb24332d83791b9a46dae # v1
         with:
           template: .github/pull_request_template.md
 
       - name: Create pull request
         if: env.update_needed == 'true'
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
         with:
           token: ${{ steps.generate-token.outputs.token }}
           branch: ${{ env.pull_request_branch }}
