@@ -1,12 +1,15 @@
-# Node: 22,24: brace-expansion patched but not yet available in Node.js base images
+# Node: 22,24: npm brace-expansion
 CVE-2026-33750
 
-# Node: 22,24: picomatch patched but not yet available in Node.js base images
+# Node: 22,24: npm picomatch
 CVE-2026-33671
 CVE-2026-33672
 
-# Node: 22,24: ip-address patched but not yet available in Node.js base images
+# Node: 22,24: npm ip-address
 CVE-2026-42338
 
-# Node: 24: brace-expansion patched but not yet available in Node.js base images
+# Node: 24: npm brace-expansion
 CVE-2026-45149
+
+# Node: 22,24: npm tar
+CVE-2026-53655

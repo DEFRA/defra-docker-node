@@ -8,9 +8,13 @@ on:
     branches:
       - main
 
+permissions: {}
+
 jobs:
   check-and-update:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
