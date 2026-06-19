@@ -4,9 +4,13 @@ on:
   schedule:
     - cron: '0 1 * * *'
 
+permissions: {}
+
 jobs:
   get-matrix-values:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       image: ${{ steps.set-var.outputs.image }}
     steps:
@@ -19,6 +23,8 @@ jobs:
 
   anchore-scan:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs:  get-matrix-values
     strategy:
       matrix:
