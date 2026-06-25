@@ -15,4 +15,6 @@ ignore:
     reason: "Node: 22,24: npm tar"
   - vulnerability: GHSA-vxpw-j846-p89q
     reason: "Node: 24: undici"
+  - vulnerability: GHSA-p88m-4jfj-68fv
+    reason: "Node: 24: undici"
   
