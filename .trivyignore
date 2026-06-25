@@ -13,3 +13,6 @@ CVE-2026-45149
 
 # Node: 22,24: npm tar
 CVE-2026-53655
+
+# Node: 24: undici
+CVE-2026-12151

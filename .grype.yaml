@@ -13,4 +13,6 @@ ignore:
     reason: "Node: 24: npm brace-expansion"
   - vulnerability: GHSA-vmf3-w455-68vh
     reason: "Node: 22,24: npm tar"
+  - vulnerability: GHSA-vxpw-j846-p89q
+    reason: "Node: 24: undici"
   
