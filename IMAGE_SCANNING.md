@@ -1,105 +1,102 @@
-
 #  Image vulnerability scanning
 
-The repository runs a vulnerability scan of the latest Docker hub parent image nightly, and the 'work in progress' image on push to a branch via the GitHub actions workflows [nightly-scan.yml](.github/workflows/nightly-scan.yml) and [scan-on-commit.yml](.github/workflows/scan-on-commit.yml) respectively.
+The repository scans the published Docker Hub image nightly via [nightly-scan.yml](.github/workflows/nightly-scan.yml), and the work in progress image on every push via [build-scan-push.yml](.github/workflows/build-scan-push.yml).
 
 Scheduled actions only run on the `main` repository branch so will run once, regardless of the number of branches.
 
 Both workflows read settings from the file [JOB.env](JOB.env) to ensure the same Node.js, Alpine, and Defra versions are used during the image scan.
 
-Scans are performed by [Anchore Grype](https://github.com/anchore/grype) using the configuration file [.grype.yaml](.grype.yaml) via the [Github Anchore Scan Action](https://github.com/anchore/scan-action).
+Scans are performed by [Anchore Grype](https://github.com/anchore/grype) and [Aqua Trivy](https://www.aquasec.com/products/trivy/). Both scanners run in report-only mode. Neither decides on its own whether the build fails: their results are evaluated together by [scan-gate.py](.github/scripts/scan-gate.py) against a single policy held in [vulnerability-policy.yml](vulnerability-policy.yml).
 
-The scan is configured to fail on vulnerabilities of `medium` or higher.
+This matters because the two scanners name the same vulnerability differently. Grype reports GHSA identifiers where Trivy reports CVE identifiers, so maintaining a separate ignore list for each meant recording the same decision twice in two vocabularies, and the two lists drifted. There is now one policy, one decision, and the gate reconciles the identifiers.
 
-Details on the configuration file and exclusions can be found in [POLICY_CONFIGURATION.md](POLICY_CONFIGURATION.md).
+## What blocks a build
+
+A finding blocks only if all of the following are true:
+
+- it is `medium` severity or higher
+- an upstream fix exists
+- it is not covered by a scope in [vulnerability-policy.yml](vulnerability-policy.yml)
+- it is not covered by an active exception in [vulnerability-policy.yml](vulnerability-policy.yml)
+
+Everything else is still reported, in the job summary and in the repository Security tab, but does not block.
+
+### Why unfixed vulnerabilities do not block
+
+If there is no upstream fix, nothing done in this repository can resolve the finding. Failing the build in that situation does not make the image safer. It only prevents shipping whatever else the build contained, and it forces an exclusion to be added purely to unblock delivery. Those findings are reported and tracked instead.
+
+### Why `main` is never blocked
+
+The gate runs on `main` but cannot fail the build there. A rebuild of an unchanged commit must produce the same result today as it did yesterday, and vulnerability feeds update continuously, so gating `main` would mean a commit that passed on merge could start failing later with no change to the code.
+
+Two things make that safe:
+
+1. Base images are pinned by digest in [image-matrix.json](image-matrix.json), so rebuilding a given commit uses exactly the base image content that was scanned when the change was reviewed.
+2. The nightly scan raises a GitHub issue when a published image develops a blocking finding, and the auto-update workflow opens a pull request to move to a fixed version.
+
+The response to a newly disclosed vulnerability is to publish a fixed patch version, not to block the pipeline.
 
 ## Addressing vulnerabilities
 
-If the Grype scan finds a vulnerability the scan will fail and a report will be stored as an artifact against the failed GitHub [Action](https://github.com/DEFRA/defra-docker-node/actions).
+Prefer these options in order.
 
-There are two solutions to address an image vulnerability: patch the Dockerfile to upgrade the vulnerable library, or add the vulnerability to the exclusion list if deemed not exploitable.
+### 1. Fix it
 
-### Adding a vulnerability to the exclusion list
+Most findings are resolved by moving to a newer version, which the [auto-update](.github/workflows/auto-update.yml) workflow does automatically:
 
-Generally speaking the only vulnerabilities that are excluded are binaries used by the `npm` command line tool, as these are not exploitable in a running container, and are complicated to update.
+- **Node itself**: bump `nodeVersion` in [image-matrix.json](image-matrix.json)
+- **npm bundled dependencies**: bump `npmVersion` in [image-matrix.json](image-matrix.json). The base image ships an npm that lags its own dependencies, so the Dockerfile installs a pinned newer npm over it
+- **Alpine packages**: check the CVE report for a fixed version, confirm it is available in [Alpine Linux](https://pkgs.alpinelinux.org/packages), then pin it on the `apk add` line in the [Dockerfile](Dockerfile)
 
-The scan output and the artifacts on the GitHub Action log will provide details of the type and severity of the vulnerability, along with the CVE ID of the vulnerability.
-
-To exclude the vulnerability add an item to the `.grype.yaml`'s `ignore` list. Full details on formatting the YAML can be found in the `grype` documenation under [Specifying Matches to Ignore](https://github.com/anchore/grype#specifying-matches-to-ignore).
-
-The preferred option is to specify the CVE ID, along with the type of vulnerability and the package name itself. This makes it easier to tie the reported vulnerability to the file.
-
-The example below shows the yaml to exclude the `CVE-2021-3807` vulnerability for the `npm` package `ansi-regex`, as well as the `npm` package itself as `CVE-2021-43616`:
-```
-ignore:
-  - vulnerability: GHSA-93q8-gq69-wqmw
-  - vulnerability: CVE-2021-3807
-    package:
-      type: npm
-      name: ansi-regex
-  - vulnerability:  CVE-2021-43616
-    package:
-      type: npm
-      name: npm
-```
-
-Any exclusions should be recorded in the [POLICY_CONFIGURATION.md](POLICY_CONFIGURATION.md) with an explanation of why they are considered non-exploitable.
-
-When updating an image to a newer version it is important to remove all existing ignores and only re-add ones that have still not been fixed to ensure the `.grype.yaml` file does not become cluttered with fixed vulnerabilities.
-
-### Patching an Alpine package
-
-If the vulnerability is for an Alpine package, check the CVE report to see if the issue is fixed in a newer version of the package. If so, check if the patched version of the package is available in [Alpine Linux](https://pkgs.alpinelinux.org/packages).
-
-The Dockerfile will need to be updated to install the fixed version of the package.
-There is already a line present in the [Dockerfile](./Dockerfile) that installs Alpine packages. The line, slightly simplified, is show below:
-
-```
-RUN apk update && apk add --no-cache tini && apk add ca-certificates && rm -rf /var/cache/apk/*
-``` 
-
-To install the new package you need to supply the name and minimum version to the `apk add` command. The syntax to install `libssl` at version `1.1.1` or greater would be:
+To require a minimum version of an Alpine package, supply the name and version to `apk add`:
 
 ```
 apk add --no-cache 'libssl1.1>1.1.1'
 ```
 
-Note that the `>` symbol will install versions `1.1.1` or greater, so acts like a `>=` operator. Also the `'` quotes around the package name and version are important, and leaving them out can lead to unintended behaviour.
+The `>` symbol installs version `1.1.1` or greater, so it behaves like `>=`. The quotes matter, and leaving them out can lead to unintended behaviour. Where a patch version contains letters, such as `1.1.1j-r0`, match it with `>1.1.1` rather than tying to the exact version. Further detail is in the [Alpine package management documentation](https://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management).
 
-The command should be placed after the `tini` installation, with a leading `&&`. The line above correctly updated would be:
+### 2. Add a scope
+
+Use a scope when a whole class of finding recurs and the reasoning is identical every time, rather than adding a fresh exception for each new identifier.
+
+The repository has one scope, `npm-bundled-dependencies`, covering `/usr/local/lib/node_modules/npm/**`. These are dependencies bundled inside the npm CLI. They are not on the request path of a running service and are only reachable by invoking npm, which production services do not do at runtime. Before this scope existed, these findings made up the large majority of the exclusion list and were re-triaged by hand every time npm's dependency tree moved.
+
+Scopes narrow the gate, they do not silence it. The npm scope still blocks on `critical`, and every scoped finding stays visible in the job summary and the Security tab.
+
+Consuming services that do invoke npm at runtime should scan their own images, because this reasoning does not hold for them.
+
+### 3. Add an exception
+
+A last resort, for a specific vulnerability that cannot be fixed and does not belong to an existing scope:
+
+```yaml
+exceptions:
+  - id: CVE-0000-00000
+    aliases: [GHSA-0000-0000-0000]
+    component: example-package
+    reason: Why this is not exploitable in this image.
+    owner: team-name
+    added: 2026-01-01
+    review_by: 2026-04-01
 ```
-RUN apk update && apk add --no-cache tini  && apk add --no-cache 'libssl1.1>1.1.1' && apk add ca-certificates && rm -rf /var/cache/apk/*
-```
-Sometimes a patch version contains letters, i.e. `1.1.1j-r0`, these should be matched with a `>1.1.1` where possible, rather than tying to a specific version with `=1.1.1j-r0`.
 
-Further details on `apk` syntax can be found in the [Alpine package management documentation](https://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management).
+`aliases` should list the identifier the other scanner uses; the job summary shows both for any finding reported by each. Once `review_by` passes, the exception stops applying and the finding blocks again, so the list cannot quietly accumulate entries nobody has revisited. Exceptions that no longer match any finding are flagged as removable in the job summary.
 
-## Running an Anchore Grype scan locally
+## Running the gate locally
 
-Install `grype` on your machine as per the instructions at https://github.com/anchore/grype.
+Install [grype](https://github.com/anchore/grype) and [trivy](https://github.com/aquasecurity/trivy), then build the production image locally as described in the [README.md](README.md):
 
-First build the production image locally with a known tag as described in the [README.md](README.md), i.e.
 ```
 docker build --no-cache --tag defra-node:latest --target=production .
 ```
 
-Scan the tagged image, i.e. `defra-node:latest`, using  the `grype` configuration file `.grype.yaml`. 
-```
-grype defra-node:latest --fail-on medium
-```
-or
-```
-grype defra-node:latest --fail-on medium -o json > report.json
-```
-**Note:** the configuration file is in the default location so does not need specifying on the command line.
+Scan it with both tools and apply the policy:
 
-Full documentation on `grype`` be found at https://github.com/anchore/grype
-
-## Upgrading Anchore Grype
-
-Grype updates are frequent. To update grype on a *nix system run the update `curl` at  https://github.com/anchore/grype as super user, i.e.
 ```
-sudo -i
-curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
-exit
+grype defra-node:latest --by-cve -o json --file grype.json
+trivy image --format json --output trivy.json defra-node:latest
+python3 .github/scripts/scan-gate.py --grype grype.json --trivy trivy.json --image defra-node:latest
 ```
+
+The script exits non-zero if anything blocks and prints the same summary the workflow produces. Note that the scanners are not given the policy directly, so running `grype --fail-on medium` on its own will report findings the policy does not treat as blocking.

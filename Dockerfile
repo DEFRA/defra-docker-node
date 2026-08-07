@@ -1,13 +1,20 @@
 # Set default values for build arguments
-ARG DEFRA_VERSION=3.1.1
-ARG BASE_VERSION=24.18.0-alpine3.24
+ARG DEFRA_VERSION=3.1.2
+ARG BASE_VERSION=24.19.0-alpine3.24
+ARG NPM_VERSION=12.0.2
+# Pinned by digest so a rebuild of the same commit produces the same image
+ARG BASE_DIGEST=sha256:d32cdf619f63fe0471182d08996dd516c6275bb5fd31ae06e55a570bd9e1ad43
 
-FROM node:$BASE_VERSION AS production
+FROM node:$BASE_VERSION@$BASE_DIGEST AS production
 
 ARG BASE_VERSION
 ARG DEFRA_VERSION
+ARG NPM_VERSION
 
 ENV NODE_ENV=production
+
+# Replace the npm bundled with the base image, which lags on its own dependencies
+RUN npm install -g --prefix /usr/local npm@$NPM_VERSION && npm cache clean --force
 
 # Set global npm dependencies to be stored under the node user directory
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global

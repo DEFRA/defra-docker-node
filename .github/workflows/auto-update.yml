@@ -19,94 +19,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
-      - name: Fetch latest Node.js versions
-        run: |
-          curl -s https://nodejs.org/dist/index.json > node_versions.json
-          echo "Fetched latest Node.js versions."
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
 
       - name: Check for updates
-        id: check-updates
-        run: |
-          latest_versions=$(jq -r '[.[] | {major: (.version | ltrimstr("v") | split(".")[0] | tonumber), version: (.version | ltrimstr("v"))}] | group_by(.major) | map({(.[0].major | tostring): .[0].version}) | add' node_versions.json)
-
-          jq -c '.[]' image-matrix.json | while read -r entry; do
-            current_version=$(echo "$entry" | jq -r '.nodeVersion')
-            major_version=$(echo "$current_version" | cut -d. -f1)
-            latest_version=$(echo "$latest_versions" | jq -r --arg major "$major_version" '.[$major]')
-            alpine_version=$(echo "$entry" | jq -r '.alpineVersion')
-
-            # Check if the Alpine image exists
-            image="node:${latest_version}-alpine${alpine_version}"
-            if [[ "$latest_version" != "$current_version" ]]; then
-              if docker pull "$image" &>/dev/null; then
-                echo "Update needed for Node.js $major_version: $current_version -> $latest_version"
-                echo "$major_version:$latest_version:$alpine_version" >> updates.txt
-              fi
-            else
-              echo "Alpine image $image not available. Skipping update for Node.js $major_version."
-            fi
-          done
-
-          # Check if updates.txt exists and is not empty
-          if [[ -s updates.txt ]]; then
-            echo "update_needed=true" >> $GITHUB_ENV
-          else
-            echo "update_needed=false" >> $GITHUB_ENV
-          fi
-
-      - name: Update files
-        if: env.update_needed == 'true'
-        run: |
-          # Update image-matrix.json
-          while IFS=: read -r major_version latest_version alpine_version; do
-            sed -i "s/\"nodeVersion\": \"${major_version}\.[^\"]*\"/\"nodeVersion\": \"${latest_version}\"/" image-matrix.json
-          done < updates.txt
-          echo "Updated image-matrix.json"
-
-          # Update README.md
-          while IFS=: read -r major_version latest_version alpine_version; do
-            sed -i -E "s/\\|[[:space:]]*${major_version}\\.[[:digit:]]*\\.[[:digit:]]*[[:space:]]*\\|[[:space:]]*${major_version}\\.[[:digit:]]*\\.[[:digit:]]*-alpine[[:digit:]]*\\.[[:digit:]]*[[:space:]]*\\|/| ${latest_version}       | ${latest_version}-alpine${alpine_version} |/" README.md
-          done < updates.txt
-          echo "Updated README.md"
-
-          # Update JOB.env
-          current_defra_version=$(grep -oP 'DEFRA_VERSION=\K[\d.]+' JOB.env)
-          new_defra_version=$(echo "$current_defra_version" | awk -F. '{print $1"."$2"."$3+1}')
-          sed -i "s/DEFRA_VERSION=.*/DEFRA_VERSION=${new_defra_version}/" JOB.env
-          echo "Updated JOB.env"
-
-          # Update Dockerfile
-          latest_node_version=$(jq -r '.[] | select(.tags[] == "latest") | .nodeVersion' image-matrix.json)
-          latest_alpine_version=$(jq -r '.[] | select(.tags[] == "latest") | .alpineVersion' image-matrix.json)
-          sed -i "s/ARG BASE_VERSION=.*/ARG BASE_VERSION=${latest_node_version}-alpine${latest_alpine_version}/" Dockerfile
-          sed -i "s/ARG DEFRA_VERSION=.*/ARG DEFRA_VERSION=${new_defra_version}/" Dockerfile
-          echo "Updated Dockerfile"
-
-      - name: Prepare pull request details
-        if: env.update_needed == 'true'
-        run: |
-          # Read updates.txt into an environment variable
-          updated_versions=$(cat updates.txt | awk -F: '{print $1}' | sort -u | paste -sd, -)
-
-          pull_request_title="Update Node.js base image: ${updated_versions}"
-          pull_request_body=$(cat updates.txt | awk -F: '{print "- Node " $1 ": " $2}')
-          pull_request_branch="update-node-base-image-${updated_versions//,/}"
-
-          echo "pull_request_branch=${pull_request_branch}" >> $GITHUB_ENV
-          echo "pull_request_title=${pull_request_title}" >> $GITHUB_ENV
-          echo "pull_request_body<<EOF" >> $GITHUB_OUTPUT
-          echo "$pull_request_body" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          echo "Prepared pull request details."
-
-      - name: Clean up temporary files
-        if: env.update_needed == 'true'
-        run: |
-          rm -f node_versions.json updates.txt
-          echo "Removed temporary files."
+        id: update
+        run: python3 .github/scripts/update-matrix.py
 
       - name: Generate GitHub App token
-        if: env.update_needed == 'true'
+        if: steps.update.outputs.updated == 'true'
         id: generate-token
         uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2
         with:
@@ -114,23 +37,35 @@ jobs:
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Render PR template
+        if: steps.update.outputs.updated == 'true'
         id: template
         uses: chuhlomin/render-template@a7c644e341797d050d1cb24332d83791b9a46dae # v1
         with:
           template: .github/pull_request_template.md
 
       - name: Create pull request
-        if: env.update_needed == 'true'
+        if: steps.update.outputs.updated == 'true'
+        id: pr
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
         with:
           token: ${{ steps.generate-token.outputs.token }}
-          branch: ${{ env.pull_request_branch }}
+          branch: update-node-base-image
           base: main
-          title: ${{ env.pull_request_title }}
+          title: ${{ steps.update.outputs.title }}
           body: |
-            Updates the Node.js base images to the latest versions:
-            ${{ steps.pr-details.outputs.pull_request_body }}
+            Updates the Node.js base images, npm and the pinned base image digests:
+
+            ${{ steps.update.outputs.body }}
+
             ${{ steps.template.outputs.result }}
           sign-commits: true
-          commit-message: ${{ env.pull_request_title }}
+          commit-message: ${{ steps.update.outputs.title }}
           team-reviewers: ${{ vars.PR_REVIEW_TEAM }}
+
+      # The vulnerability gate is a required check, so this merges only once the
+      # updated image scans clean under vulnerability-policy.yml.
+      - name: Enable auto-merge
+        if: steps.update.outputs.updated == 'true'
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: gh pr merge ${{ steps.pr.outputs.pull-request-number }} --auto --squash
