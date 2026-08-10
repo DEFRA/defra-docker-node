@@ -101,6 +101,11 @@ jobs:
 
       - name: Build findings summary
         id: summary
+        env:
+          # Path excluded from gating (build-scan-push.yml, .grype.yaml). A finding here is
+          # not actionable by us regardless of fix-availability, so it never counts as
+          # Actionable here either, that would page the review team for nothing they can do.
+          EXCLUDED_PATH: node_modules/npm/
         run: |
           : > findings.tsv
 
@@ -113,36 +118,51 @@ jobs:
                 (.artifact.name // ""),
                 (.artifact.version // ""),
                 (if (.vulnerability.fix.state // "") == "fixed" then "yes" else "no" end),
-                ((.vulnerability.fix.versions // []) | join(",")) ] | @tsv
+                ((.vulnerability.fix.versions // []) | join(",")),
+                ((.artifact.locations // []) | map(.path) | join(",")) ] | @tsv
             ' "$f" >> findings.tsv || true
           done
 
           for f in artifacts/trivy-node-*/*.json; do
             [ -e "$f" ] || continue
             jq -r '
-              (.Results // [])[] | (.Vulnerabilities // [])[] |
+              (.Results // [])[] | . as $result | ($result.Vulnerabilities // [])[] |
               [ (.Severity // "UNKNOWN" | ascii_upcase),
                 (.VulnerabilityID // ""),
                 (.PkgName // ""),
                 (.InstalledVersion // ""),
                 (if (.FixedVersion // "") != "" then "yes" else "no" end),
-                (.FixedVersion // "") ] | @tsv
+                (.FixedVersion // ""),
+                (($result.Target // "") + "," + (.PkgPath // "")) ] | @tsv
             ' "$f" >> findings.tsv || true
           done
 
           grep -E '^(MEDIUM|HIGH|CRITICAL)	' findings.tsv | sort -u > medplus.tsv || true
-          awk -F'\t' '$5=="yes"' medplus.tsv > fixable.tsv || true
-          awk -F'\t' '$5=="no"'  medplus.tsv > unfixable.tsv || true
+          awk -F'\t' -v p="$EXCLUDED_PATH" 'index($7, p) == 0 && $5 == "yes"' medplus.tsv > fixable.tsv || true
+          awk -F'\t' -v p="$EXCLUDED_PATH" 'BEGIN{OFS="\t"}
+            index($7, p) != 0 { print $0, "excluded from gating"; next }
+            $5 == "no" { print $0, "no fix available" }
+          ' medplus.tsv > awareness.tsv || true
 
           fixable_count=$(wc -l < fixable.tsv | tr -d ' ')
-          unfixable_count=$(wc -l < unfixable.tsv | tr -d ' ')
-          total=$((fixable_count + unfixable_count))
+          awareness_count=$(wc -l < awareness.tsv | tr -d ' ')
+          total=$((fixable_count + awareness_count))
 
-          render() {
+          render_fixable() {
             if [ -s "$1" ]; then
               echo "| Severity | ID | Package | Installed | Fix |"
               echo "|---|---|---|---|---|"
               awk -F'\t' '{print "| "$1" | "$2" | "$3" | "$4" | "$6" |"}' "$1"
+            else
+              echo "_None._"
+            fi
+          }
+
+          render_awareness() {
+            if [ -s "$1" ]; then
+              echo "| Severity | ID | Package | Installed | Fix | Reason |"
+              echo "|---|---|---|---|---|---|"
+              awk -F'\t' '{print "| "$1" | "$2" | "$3" | "$4" | "$6" | "$8" |"}' "$1"
             else
               echo "_None._"
             fi
@@ -155,13 +175,15 @@ jobs:
             echo
             echo "Cleared by merging the automated base-image / npm update PR, or by bumping the affected package."
             echo
-            render fixable.tsv
+            render_fixable fixable.tsv
             echo
-            echo "## Awareness — no fix available (${unfixable_count})"
+            echo "## Awareness (${awareness_count})"
             echo
-            echo "Tracked for visibility. These do not block builds because no upstream fix exists yet."
+            echo "Tracked for visibility only, never pages the review team. Either no upstream fix"
+            echo "exists yet, or the finding is inside a path structurally excluded from gating"
+            echo "(see Reason)."
             echo
-            render unfixable.tsv
+            render_awareness awareness.tsv
           } > body.md
 
           echo "fixable_count=$fixable_count" >> $GITHUB_OUTPUT
