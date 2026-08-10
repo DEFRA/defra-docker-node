@@ -12,3 +12,12 @@
 ignore: []
   # - vulnerability: CVE-0000-00000
   #   # review by 2026-01-01: fixed upstream in x.y.z, awaiting next base image release
+
+# npm bundles its own copies of small JS libraries (tar, undici, ip-address,
+# brace-expansion, ...) under this path. New CVEs against those bundled copies
+# surface constantly and can only be cleared by an upstream npm release, not by us,
+# so gating on them blocks every PR indefinitely regardless of npm version. This
+# scan-time exclusion only applies here (auto-detected by the gating scan); the
+# nightly scan uses .grype-nightly.yaml instead, so these are still visible there.
+exclude:
+  - "/usr/local/lib/node_modules/npm/**"

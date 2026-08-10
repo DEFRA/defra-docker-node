@@ -21,12 +21,21 @@ The gate is deliberately narrow so that automation is not stalled by things we c
 - Only vulnerabilities of **medium severity or higher** are considered.
 - Only vulnerabilities that have a **fix available** can block a build. Grype runs with `only-fixed`
   and Trivy with `ignore-unfixed`, so an unpatchable finding is reported but never blocks.
+- npm bundles its own copies of small JS libraries (`tar`, `undici`, `ip-address`,
+  `brace-expansion`, ...). New CVEs against those bundled copies surface constantly and can only be
+  cleared by an upstream npm release, not by us, so they are excluded from the gate by path
+  (`/usr/local/lib/node_modules/npm/**`, Grype `exclude` and Trivy `skip-dirs`). Keeping npm itself
+  pinned and upgraded (see below) still applies, it reduces this set, but does not eliminate it.
 - The gate only fails **branch builds**. The `main` branch always builds and publishes, so a
   vulnerability disclosed between approval and merge can never stop a release. Anything found on
   `main` is surfaced by the nightly scan instead.
 
 This means a pull request only fails when there is a real, actionable fix to apply, which is usually
 delivered automatically by the base-image or npm update PR.
+
+The nightly scan does not apply any of the above exclusions, so it still reports npm-bundle and
+unfixable findings for awareness (see below). It uses [.grype-nightly.yaml](.grype-nightly.yaml), an
+empty config, so it does not inherit the gating scan's `exclude` list.
 
 ## The nightly tracking issue
 
