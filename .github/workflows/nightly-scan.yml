@@ -140,7 +140,7 @@ jobs:
           grep -E '^(MEDIUM|HIGH|CRITICAL)	' findings.tsv | sort -u > medplus.tsv || true
           awk -F'\t' -v p="$EXCLUDED_PATH" 'index($7, p) == 0 && $5 == "yes"' medplus.tsv > fixable.tsv || true
           awk -F'\t' -v p="$EXCLUDED_PATH" 'BEGIN{OFS="\t"}
-            index($7, p) != 0 { print $0, "excluded from gating"; next }
+            index($7, p) != 0 { print $0, "npm bundles this dependency itself; needs a new npm release, not just a newer library"; next }
             $5 == "no" { print $0, "no fix available" }
           ' medplus.tsv > awareness.tsv || true
 
@@ -179,9 +179,9 @@ jobs:
             echo
             echo "## Awareness (${awareness_count})"
             echo
-            echo "Tracked for visibility only, never pages the review team. Either no upstream fix"
-            echo "exists yet, or the finding is inside a path structurally excluded from gating"
-            echo "(see Reason)."
+            echo "Tracked for visibility only, never pages the review team. See Reason for why"
+            echo "each one isn't gated: no upstream fix yet, or, for npm-bundled dependencies,"
+            echo "the fix exists in the library but npm hasn't shipped a release bundling it."
             echo
             render_awareness awareness.tsv
           } > body.md
