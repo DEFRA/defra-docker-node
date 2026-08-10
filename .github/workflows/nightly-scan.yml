@@ -37,8 +37,9 @@ jobs:
       - name: Set job environment variables
         run: cat JOB.env >> $GITHUB_ENV
 
-      # The nightly scan reports everything, including unfixable findings, so it does
-      # not use only-fixed/ignore-unfixed. The report job classifies the results.
+      # The nightly scan reports everything, including unfixable findings and the
+      # npm-bundle exclusion applied to gating, so it uses its own empty config
+      # instead of auto-detecting .grype.yaml, and skips only-fixed/ignore-unfixed.
       - name: Run Anchore Grype scan
         id: grype-scan
         uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7
@@ -47,6 +48,7 @@ jobs:
           fail-build: false
           severity-cutoff: "medium"
           output-format: json
+          config: .grype-nightly.yaml
         continue-on-error: true
 
       - name: Run Aqua Trivy scan

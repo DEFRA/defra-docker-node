@@ -1,0 +1,3 @@
+# Deliberately empty. Used only by the nightly scan so it never auto-detects
+# .grype.yaml, keeping the nightly report fully unfiltered (including anything
+# excluded from the gating scan, e.g. the npm bundle path) for awareness.
