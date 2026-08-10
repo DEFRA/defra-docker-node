@@ -1,11 +1,13 @@
 # Set default values for build arguments
 ARG DEFRA_VERSION=3.1.1
 ARG BASE_VERSION=24.18.0-alpine3.24
+ARG NPM_VERSION=12.0.2
 
 FROM node:$BASE_VERSION AS production
 
 ARG BASE_VERSION
 ARG DEFRA_VERSION
+ARG NPM_VERSION
 
 ENV NODE_ENV=production
 
@@ -15,6 +17,12 @@ ENV PATH=$PATH:/home/node/.npm-global/bin
 ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/internal-ca.crt
 
 RUN apk add --no-cache tini ca-certificates
+
+# Upgrade the bundled npm CLI to a pinned version to clear vulnerabilities in the
+# libraries npm ships with. Target /usr/local explicitly so the base image's own npm
+# is replaced rather than a second copy installed under NPM_CONFIG_PREFIX.
+# NPM_VERSION is kept current by the auto-update workflow.
+RUN npm install -g --prefix=/usr/local npm@${NPM_VERSION} && npm cache clean --force
 
 # Install Internal CA certificate for firewall and Zscaler proxy
 COPY certificates/internal-ca.crt /usr/local/share/ca-certificates/internal-ca.crt

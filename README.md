@@ -52,33 +52,33 @@ Any new features or changes to supported Node or Alpine versions will be publish
 
 On commit GitHub Actions will build both `node` and `node-development` images for the Node.js versions listed in the [image-matrix.json](image-matrix.json) file, and perform a vulnerability scan as described below.
 
-In addition a commit to the main branch will push the images to the [defradigital](https://hub.docker.com/u/defradigital) organisation in Docker Hub using the version tag specified in the [JOB.env](JOB.env) file. This version tag is expected to be manually updated on each release.
+In addition a commit to the main branch will push the images to the [defradigital](https://hub.docker.com/u/defradigital) organisation in Docker Hub using the version tag specified in the [JOB.env](JOB.env) file. This tag is bumped automatically by the auto-update workflow (see below).
 
 In addition to the version, the images will also be tagged with the contents of the `tags` array from [image-matrix.json](image-matrix.json) when pushed to Docker Hub.
 
 ## Image vulnerability scanning
 
-A GitHub Action runs a nightly scan of the images published to Docker using [Anchore Grype](https://github.com/anchore/grype/) and [Aqua Trivy](https://www.aquasec.com/products/trivy/). The latest images for each supported Node.js version are scanned.
+A GitHub Action runs a nightly scan of the images published to Docker Hub using [Anchore Grype](https://github.com/anchore/grype/) and [Aqua Trivy](https://www.aquasec.com/products/trivy/), and every push to a branch scans the image before it can be released.
 
-New images are also scanned before release on any push to a branch.
-
-This ensures Defra services that use the parent images are starting from a known secure foundation, and can limit patching to only newly added libraries.
+A build is only blocked by vulnerabilities that have a fix available, so unpatchable findings do not stop delivery. The nightly scan records every finding, fixable and unfixable, in a single tracking issue labelled `security-scan`.
 
 For more details see [Image Scanning](IMAGE_SCANNING.md)
 
 ## Automated version updates
 
-The [auto-update](/.github/workflows/auto-update.yml) workflow runs nightly to check for new versions of Node.js and their associated Alpine images. If a new version is found, the workflow will create a pull request to update to the latest version.
+The [auto-update](/.github/workflows/auto-update.yml) workflow runs nightly. It checks for new releases of Node.js (and their Alpine images) and of the npm CLI, and when it finds one it opens a pull request that bumps the affected versions across the [image-matrix.json](image-matrix.json), [JOB.env](JOB.env), [Dockerfile](Dockerfile), [README.md](README.md) and the [examples](examples).
 
-These updates are scoped to the Node.js versions listed in the [image-matrix.json](image-matrix.json) file.
+Because unfixable vulnerabilities no longer block a build (see [Image Scanning](IMAGE_SCANNING.md)), these pull requests normally pass the scan on their own. Once a reviewer approves, the PR merges automatically and the new images are published.
 
-## Convenience script
+## Repository setup
 
-A simple convenience script [bump](./bump) is provided to substitute version in the files `Dockerfile`, `README.md`, and `image-matrix.json`.
+The automation relies on a few repository settings:
 
-The 'from' and 'to' values to substitute are separated by a colon, and multiple arguments must be separated by a space.
-
-i.e. `./bump 16.13.0:16.18.1 14.18.1:14.21.1` will replace all instances of `16.13.0` with `16.18.1` and all instances of `14.18.1` with `14.21.1`.
+- **Branch protection on `main`**: add `required-check` (from the build-scan-push workflow) as a required status check. It is a single, stable check that passes only when every image in the matrix has built and scanned cleanly, so it stays valid across version bumps. The individual matrix jobs are named per version and cannot be pinned directly.
+- **Allow auto-merge**: enable it under *Settings → General → Pull Requests* so update PRs can merge once approved and green.
+- **Pull request review**: keep review required. Update PRs still need a single human approval; the `required-check` gate is the security backstop.
+- **`security-scan` label**: create it once. The nightly scan uses it to find and update its single tracking issue.
+- **Secrets and variables**: `DOCKER_USERNAME`, `DOCKER_TOKEN`, `APP_ID`, `APP_PRIVATE_KEY` and the `PR_REVIEW_TEAM` variable are already configured and used by the workflows.
 
 ## Building images locally
 

@@ -1,0 +1,14 @@
+# Grype configuration.
+#
+# Vulnerability exceptions go in the ignore list below. Only add a FIXABLE
+# vulnerability that, for a genuine reason, we cannot act on yet. Unfixable findings
+# are excluded by the only-fixed option and reported by the nightly scan, so they
+# never belong here.
+#
+# Grype has no native expiry, so add a "review by yyyy-mm-dd" note to every entry and
+# prune the list on each base image bump.
+#
+# Docs: https://github.com/anchore/grype#specifying-matches-to-ignore
+ignore: []
+  # - vulnerability: CVE-0000-00000
+  #   # review by 2026-01-01: fixed upstream in x.y.z, awaiting next base image release

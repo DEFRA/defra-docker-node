@@ -1,0 +1,15 @@
+# Time-boxed vulnerability exceptions for Trivy.
+#
+# Only add an entry here for a FIXABLE vulnerability that, for a genuine reason, we
+# cannot act on yet. Unfixable findings are handled automatically by ignore-unfixed
+# and are reported by the nightly scan, so they never belong here.
+#
+# Every entry MUST have:
+#   - statement:  why it is temporarily accepted
+#   - expired_at: the date it stops being ignored (yyyy-mm-dd); after this it blocks again
+#
+# Docs: https://trivy.dev/latest/docs/configuration/filtering/#trivyignoreyaml
+vulnerabilities: []
+  # - id: CVE-0000-00000
+  #   statement: Fixed upstream in x.y.z; awaiting the next base image release.
+  #   expired_at: 2026-01-01

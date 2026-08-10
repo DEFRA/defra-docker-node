@@ -3,6 +3,7 @@ name: NIGHTLY-SCAN
 on:
   schedule:
     - cron: '0 1 * * *'
+  workflow_dispatch:
 
 permissions: {}
 
@@ -21,27 +22,31 @@ jobs:
           cat ./image-matrix.json >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
-  anchore-scan:
+  scan:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    needs:  get-matrix-values
+    needs: get-matrix-values
     strategy:
+      fail-fast: false
       matrix:
         image: ${{fromJSON(needs.get-matrix-values.outputs.image)}}
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
       - name: Set job environment variables
-        run:  cat JOB.env >> $GITHUB_ENV
-      
+        run: cat JOB.env >> $GITHUB_ENV
+
+      # The nightly scan reports everything, including unfixable findings, so it does
+      # not use only-fixed/ignore-unfixed. The report job classifies the results.
       - name: Run Anchore Grype scan
         id: grype-scan
-        uses: anchore/scan-action@1638637db639e0ade3258b51db49a9a137574c3e # v6
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7
         with:
           image: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-node${{matrix.image.nodeVersion}}
-          fail-build: true
+          fail-build: false
           severity-cutoff: "medium"
+          output-format: json
         continue-on-error: true
 
       - name: Run Aqua Trivy scan
@@ -49,29 +54,148 @@ jobs:
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
         with:
           image-ref: defradigital/${{env.IMAGE_NAME}}:${{env.DEFRA_VERSION}}-node${{matrix.image.nodeVersion}}
-          format: sarif
-          output: trivy-reports-node-${{ matrix.image.nodeVersion }}
-          exit-code: 1
+          format: json
+          output: trivy-node-${{ matrix.image.nodeVersion }}.json
+          exit-code: 0
           vuln-type: os,library
           severity: CRITICAL,HIGH,MEDIUM
         continue-on-error: true
 
-      - name: Upload Grype SARIF report
-        if: ${{ steps.grype-scan.outcome == 'failure' }}
+      - name: Upload Grype report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: grype-reports-node-${{ matrix.image.nodeVersion }}
-          path: ${{ steps.grype-scan.outputs.sarif }}
+          name: grype-node-${{ matrix.image.nodeVersion }}
+          path: ${{ steps.grype-scan.outputs.json }}
+          if-no-files-found: ignore
 
-      - name: Upload Trivy SARIF report
-        if: ${{ steps.trivy-scan.outcome == 'failure' }}
+      - name: Upload Trivy report
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: trivy-reports-node-${{ matrix.image.nodeVersion }}
-          path: trivy-reports-node-${{ matrix.image.nodeVersion }}
+          name: trivy-node-${{ matrix.image.nodeVersion }}
+          path: trivy-node-${{ matrix.image.nodeVersion }}.json
+          if-no-files-found: ignore
 
-      - name: Fail build if scans failed
-        if: ${{ (steps.grype-scan.outcome == 'failure' || steps.trivy-scan.outcome == 'failure') }}
+  report:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    needs: scan
+    if: always()
+    env:
+      GH_TOKEN: ${{ github.token }}
+      LABEL: security-scan
+      TITLE: "Nightly vulnerability scan"
+      REVIEW_TEAM: ${{ vars.PR_REVIEW_TEAM }}
+    steps:
+      - name: Download scan reports
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: artifacts
+        continue-on-error: true
+
+      - name: Build findings summary
+        id: summary
         run: |
-          echo "One or more scans failed. Failing the build."
-          exit 1
+          : > findings.tsv
+
+          for f in artifacts/grype-node-*/*.json; do
+            [ -e "$f" ] || continue
+            jq -r '
+              (.matches // [])[] |
+              [ (.vulnerability.severity // "Unknown" | ascii_upcase),
+                (.vulnerability.id // ""),
+                (.artifact.name // ""),
+                (.artifact.version // ""),
+                (if (.vulnerability.fix.state // "") == "fixed" then "yes" else "no" end),
+                ((.vulnerability.fix.versions // []) | join(",")) ] | @tsv
+            ' "$f" >> findings.tsv || true
+          done
+
+          for f in artifacts/trivy-node-*/*.json; do
+            [ -e "$f" ] || continue
+            jq -r '
+              (.Results // [])[] | (.Vulnerabilities // [])[] |
+              [ (.Severity // "UNKNOWN" | ascii_upcase),
+                (.VulnerabilityID // ""),
+                (.PkgName // ""),
+                (.InstalledVersion // ""),
+                (if (.FixedVersion // "") != "" then "yes" else "no" end),
+                (.FixedVersion // "") ] | @tsv
+            ' "$f" >> findings.tsv || true
+          done
+
+          grep -E '^(MEDIUM|HIGH|CRITICAL)	' findings.tsv | sort -u > medplus.tsv || true
+          awk -F'\t' '$5=="yes"' medplus.tsv > fixable.tsv || true
+          awk -F'\t' '$5=="no"'  medplus.tsv > unfixable.tsv || true
+
+          fixable_count=$(wc -l < fixable.tsv | tr -d ' ')
+          unfixable_count=$(wc -l < unfixable.tsv | tr -d ' ')
+          total=$((fixable_count + unfixable_count))
+
+          render() {
+            if [ -s "$1" ]; then
+              echo "| Severity | ID | Package | Installed | Fix |"
+              echo "|---|---|---|---|---|"
+              awk -F'\t' '{print "| "$1" | "$2" | "$3" | "$4" | "$6" |"}' "$1"
+            else
+              echo "_None._"
+            fi
+          }
+
+          {
+            echo "_Updated $(date -u '+%Y-%m-%d %H:%M UTC') from the nightly scan of the published images._"
+            echo
+            echo "## Actionable — fix available (${fixable_count})"
+            echo
+            echo "Cleared by merging the automated base-image / npm update PR, or by bumping the affected package."
+            echo
+            render fixable.tsv
+            echo
+            echo "## Awareness — no fix available (${unfixable_count})"
+            echo
+            echo "Tracked for visibility. These do not block builds because no upstream fix exists yet."
+            echo
+            render unfixable.tsv
+          } > body.md
+
+          echo "fixable_count=$fixable_count" >> $GITHUB_OUTPUT
+          echo "total=$total" >> $GITHUB_OUTPUT
+
+      - name: Update tracking issue
+        run: |
+          fixable=${{ steps.summary.outputs.fixable_count }}
+          total=${{ steps.summary.outputs.total }}
+
+          number=$(gh issue list --label "$LABEL" --state all --limit 1 --json number --jq '.[0].number // empty')
+          state=""
+          if [ -n "$number" ]; then
+            state=$(gh issue view "$number" --json state --jq '.state')
+          fi
+
+          # Nothing to report: close the issue if one is open, otherwise do nothing.
+          if [ "$total" -eq 0 ]; then
+            if [ -n "$number" ] && [ "$state" = "OPEN" ]; then
+              gh issue edit "$number" --body-file body.md
+              gh issue close "$number" --reason completed || true
+            fi
+            echo "No medium+ findings."
+            exit 0
+          fi
+
+          if [ -z "$number" ]; then
+            url=$(gh issue create --title "$TITLE" --label "$LABEL" --body-file body.md)
+            number=${url##*/}
+            state="OPEN"
+          else
+            gh issue edit "$number" --body-file body.md
+          fi
+
+          # Notify only when newly actionable, so an already-open issue updates silently.
+          if [ "$fixable" -gt 0 ] && [ "$state" != "OPEN" ]; then
+            gh issue reopen "$number" || true
+            if [ -n "$REVIEW_TEAM" ]; then
+              gh issue comment "$number" --body "Fixable vulnerabilities detected in the published images. cc @${REVIEW_TEAM}"
+            fi
+          fi
+

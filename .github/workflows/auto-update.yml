@@ -49,6 +49,27 @@ jobs:
 
           # Check if updates.txt exists and is not empty
           if [[ -s updates.txt ]]; then
+            echo "node_update=true" >> $GITHUB_ENV
+          else
+            echo "node_update=false" >> $GITHUB_ENV
+          fi
+
+      - name: Check for npm update
+        run: |
+          current_npm=$(grep -oP 'NPM_VERSION=\K[\d.]+' JOB.env)
+          latest_npm=$(curl -s https://registry.npmjs.org/npm/latest | jq -r '.version')
+
+          if [[ "$latest_npm" != "$current_npm" && -n "$latest_npm" && "$latest_npm" != "null" ]]; then
+            echo "npm update needed: $current_npm -> $latest_npm"
+            echo "npm_update=true" >> $GITHUB_ENV
+            echo "latest_npm=$latest_npm" >> $GITHUB_ENV
+          else
+            echo "npm_update=false" >> $GITHUB_ENV
+          fi
+
+      - name: Determine whether an update is required
+        run: |
+          if [[ "$node_update" == "true" || "$npm_update" == "true" ]]; then
             echo "update_needed=true" >> $GITHUB_ENV
           else
             echo "update_needed=false" >> $GITHUB_ENV
@@ -57,45 +78,60 @@ jobs:
       - name: Update files
         if: env.update_needed == 'true'
         run: |
-          # Update image-matrix.json
-          while IFS=: read -r major_version latest_version alpine_version; do
-            sed -i "s/\"nodeVersion\": \"${major_version}\.[^\"]*\"/\"nodeVersion\": \"${latest_version}\"/" image-matrix.json
-          done < updates.txt
-          echo "Updated image-matrix.json"
-
-          # Update README.md
-          while IFS=: read -r major_version latest_version alpine_version; do
-            sed -i -E "s/\\|[[:space:]]*${major_version}\\.[[:digit:]]*\\.[[:digit:]]*[[:space:]]*\\|[[:space:]]*${major_version}\\.[[:digit:]]*\\.[[:digit:]]*-alpine[[:digit:]]*\\.[[:digit:]]*[[:space:]]*\\|/| ${latest_version}       | ${latest_version}-alpine${alpine_version} |/" README.md
-          done < updates.txt
-          echo "Updated README.md"
-
-          # Update JOB.env
+          # A new base image or npm release always produces a new Defra image version.
           current_defra_version=$(grep -oP 'DEFRA_VERSION=\K[\d.]+' JOB.env)
           new_defra_version=$(echo "$current_defra_version" | awk -F. '{print $1"."$2"."$3+1}')
           sed -i "s/DEFRA_VERSION=.*/DEFRA_VERSION=${new_defra_version}/" JOB.env
-          echo "Updated JOB.env"
+          echo "Bumped Defra version ${current_defra_version} -> ${new_defra_version}"
 
-          # Update Dockerfile
+          # Apply any Node.js version bumps to the matrix and README.
+          if [[ "$node_update" == "true" ]]; then
+            while IFS=: read -r major_version latest_version alpine_version; do
+              sed -i "s/\"nodeVersion\": \"${major_version}\.[^\"]*\"/\"nodeVersion\": \"${latest_version}\"/" image-matrix.json
+              sed -i -E "s/\\|[[:space:]]*${major_version}\\.[[:digit:]]*\\.[[:digit:]]*[[:space:]]*\\|[[:space:]]*${major_version}\\.[[:digit:]]*\\.[[:digit:]]*-alpine[[:digit:]]*\\.[[:digit:]]*[[:space:]]*\\|/| ${latest_version}       | ${latest_version}-alpine${alpine_version} |/" README.md
+            done < updates.txt
+            echo "Updated image-matrix.json and README.md"
+          fi
+
+          # Apply any npm bump to JOB.env and the Dockerfile.
+          if [[ "$npm_update" == "true" ]]; then
+            sed -i "s/NPM_VERSION=.*/NPM_VERSION=${latest_npm}/" JOB.env
+            sed -i "s/ARG NPM_VERSION=.*/ARG NPM_VERSION=${latest_npm}/" Dockerfile
+            echo "Updated npm to ${latest_npm}"
+          fi
+
+          # Point the Dockerfile and examples at the current latest image.
           latest_node_version=$(jq -r '.[] | select(.tags[] == "latest") | .nodeVersion' image-matrix.json)
           latest_alpine_version=$(jq -r '.[] | select(.tags[] == "latest") | .alpineVersion' image-matrix.json)
           sed -i "s/ARG BASE_VERSION=.*/ARG BASE_VERSION=${latest_node_version}-alpine${latest_alpine_version}/" Dockerfile
           sed -i "s/ARG DEFRA_VERSION=.*/ARG DEFRA_VERSION=${new_defra_version}/" Dockerfile
-          echo "Updated Dockerfile"
+          sed -i "s/ARG BASE_VERSION=.*/ARG BASE_VERSION=${new_defra_version}-node${latest_node_version}/" examples/Dockerfile.web examples/Dockerfile.service
+          echo "Updated Dockerfile and examples"
 
       - name: Prepare pull request details
+        id: pr-details
         if: env.update_needed == 'true'
         run: |
-          # Read updates.txt into an environment variable
-          updated_versions=$(cat updates.txt | awk -F: '{print $1}' | sort -u | paste -sd, -)
+          body=""
+          if [[ "$node_update" == "true" ]]; then
+            body=$(cat updates.txt | awk -F: '{print "- Node " $1 ": " $2}')
+          fi
+          if [[ "$npm_update" == "true" ]]; then
+            body="${body}"$'\n'"- npm: ${latest_npm}"
+          fi
 
-          pull_request_title="Update Node.js base image: ${updated_versions}"
-          pull_request_body=$(cat updates.txt | awk -F: '{print "- Node " $1 ": " $2}')
-          pull_request_branch="update-node-base-image-${updated_versions//,/}"
+          updated_versions=""
+          if [[ "$node_update" == "true" ]]; then
+            updated_versions=$(cat updates.txt | awk -F: '{print $1}' | sort -u | paste -sd, -)
+          fi
+          if [[ "$npm_update" == "true" ]]; then
+            updated_versions="${updated_versions:+$updated_versions,}npm"
+          fi
 
-          echo "pull_request_branch=${pull_request_branch}" >> $GITHUB_ENV
-          echo "pull_request_title=${pull_request_title}" >> $GITHUB_ENV
+          echo "pull_request_title=Update base image: ${updated_versions}" >> $GITHUB_ENV
+          echo "pull_request_branch=update-base-image-${updated_versions//,/-}" >> $GITHUB_ENV
           echo "pull_request_body<<EOF" >> $GITHUB_OUTPUT
-          echo "$pull_request_body" >> $GITHUB_OUTPUT
+          echo "$body" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
           echo "Prepared pull request details."
 
@@ -114,12 +150,14 @@ jobs:
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Render PR template
+        if: env.update_needed == 'true'
         id: template
         uses: chuhlomin/render-template@a7c644e341797d050d1cb24332d83791b9a46dae # v1
         with:
           template: .github/pull_request_template.md
 
       - name: Create pull request
+        id: create-pr
         if: env.update_needed == 'true'
         uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
         with:
@@ -134,3 +172,13 @@ jobs:
           sign-commits: true
           commit-message: ${{ env.pull_request_title }}
           team-reviewers: ${{ vars.PR_REVIEW_TEAM }}
+
+      # Queues the PR to merge automatically once the required scan check passes and a
+      # reviewer approves. Unfixable vulnerabilities no longer block, so most updates
+      # only wait on a single approval.
+      - name: Enable auto-merge
+        if: env.update_needed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: gh pr merge ${{ steps.create-pr.outputs.pull-request-number }} --auto --squash
+
