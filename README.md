@@ -62,19 +62,15 @@ A GitHub Action runs a nightly scan of the images published to Docker using [Anc
 
 New images are also scanned before release on any push to a branch.
 
-Both scanners report their findings to a single policy in [vulnerability-policy.yml](vulnerability-policy.yml), which decides what blocks a build. Findings with no upstream fix are reported but do not block, since no change here can resolve them.
-
 This ensures Defra services that use the parent images are starting from a known secure foundation, and can limit patching to only newly added libraries.
 
 For more details see [Image Scanning](IMAGE_SCANNING.md)
 
 ## Automated version updates
 
-The [auto-update](/.github/workflows/auto-update.yml) workflow runs nightly to check for new versions of Node.js, npm, and the digests of the base images they are built from. If anything has moved, the workflow opens a pull request, and merges it automatically once the vulnerability policy gate passes.
+The [auto-update](/.github/workflows/auto-update.yml) workflow runs nightly to check for new versions of Node.js and their associated Alpine images. If a new version is found, the workflow will create a pull request to update to the latest version.
 
 These updates are scoped to the Node.js versions listed in the [image-matrix.json](image-matrix.json) file.
-
-Base images are pinned by digest in that file. This is what allows a rebuild of an unchanged commit to produce the same image, and is why the gate does not need to run as a blocking check on `main`.
 
 ## Convenience script
 

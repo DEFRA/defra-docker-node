@@ -1,4 +1,2 @@
 anchore-reports
 .vscode
-__pycache__/
-*.pyc

@@ -28,7 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write
     needs:  get-matrix-values
     strategy:
       fail-fast: false
@@ -88,8 +87,6 @@ jobs:
           --target=${{matrix.target}} \
           --build-arg DEFRA_VERSION=$DEFRA_VERSION \
           --build-arg BASE_VERSION=${{matrix.image.nodeVersion}}-alpine${{matrix.image.alpineVersion}} \
-          --build-arg BASE_DIGEST=${{matrix.image.baseDigest}} \
-          --build-arg NPM_VERSION=${{matrix.image.npmVersion}} \
           --tag ${{steps.setImageDetails.outputs.fullImageName}} \
           ${{steps.setImageDetails.outputs.latestTag}}
           docker images
@@ -100,18 +97,15 @@ jobs:
           docker save ${{steps.setImageDetails.outputs.fullImageName}} -o image-${{ matrix.image.nodeVersion }}.tar
           ls -lh image-${{ matrix.image.nodeVersion }}.tar
 
-      # Scanners report only. vulnerability-policy.yml decides what blocks, so the two
-      # cannot drift apart and the policy is reviewable in one place.
       - name: Run Anchore Grype scan
         id: grype-scan
         if: ${{ matrix.target == 'production' }}
         uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7
         with:
           image: docker-archive:image-${{ matrix.image.nodeVersion }}.tar
-          fail-build: false
-          output-format: json
-          by-cve: true
-          cache-db: true
+          fail-build: true
+          severity-cutoff: "medium"
+        continue-on-error: true
 
       - name: Run Aqua Trivy scan
         id: trivy-scan
@@ -120,61 +114,57 @@ jobs:
         with:
           input: image-${{ matrix.image.nodeVersion }}.tar
           scan-type: image
-          format: json
-          output: trivy-node-${{ matrix.image.nodeVersion }}.json
-          exit-code: 0
+          format: sarif
+          output: trivy-reports-node-${{ matrix.image.nodeVersion }}
+          exit-code: 1
           vuln-type: os,library
-          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
-
-      - name: Set up Python
-        if: ${{ matrix.target == 'production' }}
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
-        with:
-          python-version: '3.12'
-
-      - name: Apply vulnerability policy
-        id: gate
-        if: ${{ matrix.target == 'production' }}
+          severity: CRITICAL,HIGH,MEDIUM
         continue-on-error: true
-        run: |
-          pip install --quiet pyyaml
-          python3 .github/scripts/scan-gate.py \
-            --grype "${{ steps.grype-scan.outputs.json }}" \
-            --trivy trivy-node-${{ matrix.image.nodeVersion }}.json \
-            --image "${{ steps.setImageDetails.outputs.fullImageName }}" \
-            --summary "$GITHUB_STEP_SUMMARY" \
-            --sarif gate-node-${{ matrix.image.nodeVersion }}.sarif \
-            --json gate-node-${{ matrix.image.nodeVersion }}.json
 
-      - name: Upload policy results to code scanning
-        if: ${{ matrix.target == 'production' }}
-        uses: github/codeql-action/upload-sarif@c4dd10e44af883a891fe31ced449bcb4a6728b9b # v3
-        with:
-          sarif_file: gate-node-${{ matrix.image.nodeVersion }}.sarif
-          category: node-${{ matrix.image.nodeVersion }}
-
-      - name: Upload scan reports
-        if: ${{ matrix.target == 'production' }}
+      - name: Upload Grype SARIF report
+        if: ${{ steps.grype-scan.outcome == 'failure' && matrix.target == 'production' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: scan-reports-node-${{ matrix.image.nodeVersion }}
-          path: |
-            ${{ steps.grype-scan.outputs.json }}
-            trivy-node-${{ matrix.image.nodeVersion }}.json
-            gate-node-${{ matrix.image.nodeVersion }}.json
+          name: grype-reports-node-${{ matrix.image.nodeVersion }}
+          path: ${{ steps.grype-scan.outputs.sarif }}
 
-      # Main is deliberately not gated: a rebuild of an unchanged commit must not start
-      # failing because the vulnerability feeds moved. Nightly raises an issue instead.
-      - name: Enforce vulnerability policy
-        if: ${{ matrix.target == 'production' && steps.gate.outcome == 'failure' && github.ref != 'refs/heads/main' }}
+      - name: Upload Trivy SARIF report
+        if: ${{ steps.trivy-scan.outcome == 'failure' && matrix.target == 'production' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: trivy-reports-node-${{ matrix.image.nodeVersion }}
+          path: trivy-reports-node-${{ matrix.image.nodeVersion }}
+
+      - name: Fail build if scans failed
+        if: ${{ (steps.grype-scan.outcome == 'failure' || steps.trivy-scan.outcome == 'failure') && matrix.target == 'production' && github.ref != 'refs/heads/main' }}
         run: |
-          echo "::error::Vulnerability policy gate failed. See the job summary for the blocking findings."
+          echo "## Scan Results" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.grype-scan.outcome }}" == "failure" ]; then
+            echo "### Grype Vulnerabilities" >> $GITHUB_STEP_SUMMARY
+            echo "| Severity | CVE | Package | Details |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|-----|---------|---------|" >> $GITHUB_STEP_SUMMARY
+            jq -r '.runs[].results[] | "| \(.level) | \(.ruleId) | \(.message.text | split("\n")[0]) | \(.message.text | split("\n")[1:3] | join(", ")) |"' \
+              "${{ steps.grype-scan.outputs.sarif }}" >> $GITHUB_STEP_SUMMARY
+            echo "::group::Grype Vulnerabilities"
+            jq -r '.runs[].results[] | "\(.level)\t\(.ruleId)\t\(.message.text)"' \
+              "${{ steps.grype-scan.outputs.sarif }}"
+            echo "::endgroup::"
+          fi
+
+          if [ "${{ steps.trivy-scan.outcome }}" == "failure" ]; then
+            echo "### Trivy Vulnerabilities" >> $GITHUB_STEP_SUMMARY
+            echo "| Severity | CVE | Package | Details |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|-----|---------|---------|" >> $GITHUB_STEP_SUMMARY
+            jq -r '.runs[].results[] | "| \(.level) | \(.ruleId) | \(.message.text | split("\n")[0]) | \(.message.text | split("\n")[1:3] | join(", ")) |"' \
+              "trivy-reports-node-${{ matrix.image.nodeVersion }}" >> $GITHUB_STEP_SUMMARY
+            echo "::group::Trivy Vulnerabilities"
+            jq -r '.runs[].results[] | "\(.level)\t\(.ruleId)\t\(.message.text)"' \
+              "trivy-reports-node-${{ matrix.image.nodeVersion }}"
+            echo "::endgroup::"
+          fi
+
           exit 1
-
-      - name: Report policy failure on main
-        if: ${{ matrix.target == 'production' && steps.gate.outcome == 'failure' && github.ref == 'refs/heads/main' }}
-        run: |
-          echo "::warning::Vulnerability policy gate failed on main. The image is still published to keep main rebuildable; the nightly scan will raise an issue."
 
       - name: Tag image
         run: |
