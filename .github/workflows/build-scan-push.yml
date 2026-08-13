@@ -27,7 +27,8 @@ jobs:
   build-images:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      # write is only exercised by the Dependency Graph submission step, gated to main/production
+      contents: write
     needs:  get-matrix-values
     strategy:
       fail-fast: false
@@ -84,6 +85,7 @@ jobs:
           docker buildx build . --file Dockerfile --no-cache \
           --platform linux/amd64,linux/arm64 \
           --load \
+          --sbom=true \
           --target=${{matrix.target}} \
           --build-arg DEFRA_VERSION=$DEFRA_VERSION \
           --build-arg BASE_VERSION=${{matrix.image.nodeVersion}}-alpine${{matrix.image.alpineVersion}} \
@@ -200,7 +202,19 @@ jobs:
           do
             docker image push ${{steps.setImageDetails.outputs.dockerRepoName}}:$TAG
           done
-    
+
+      - name: Submit SBOM to GitHub Dependency Graph
+        if: ${{ matrix.target == 'production' && github.ref == 'refs/heads/main' }}
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          image: ${{ steps.setImageDetails.outputs.fullImageName }}
+          format: spdx-json
+          artifact-name: sbom-node-${{ matrix.image.nodeVersion }}.spdx.json
+          dependency-snapshot: true
+          # Matrix builds don't get a unique correlator by default, so snapshots would
+          # overwrite each other in the Dependency Graph without this.
+          dependency-snapshot-correlator: docker-image-node-${{ matrix.image.nodeVersion }}
+
   required-check:
     # Single stable-named gate for branch protection. The matrix jobs are named per
     # version (e.g. "build-images (production, 24.18.0)") so they cannot be pinned as
