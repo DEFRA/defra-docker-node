@@ -43,15 +43,15 @@ EXPOSE 9229 9230
 # We specify a command here, as we can run this stage directly using either docker-compose files, or passing --target to the docker build command
 CMD [ "npm", "run", "start:watch" ]
 
-# Test stages copy in Jest configuration and declare the test task as the default command. We use the development-*
+# Test stages copy in Vitest configuration and declare the test task as the default command. We use the development-*
 #   stages for this as they will have all the tools required installed and have everything ready to run tests.
 FROM development-web AS test-web
-COPY --chown=node:node jest.config.js ./jest.config.js
+COPY --chown=node:node vitest.config.js ./vitest.config.js
 COPY --chown=node:node test/ ./test/
 CMD [ "npm", "run", "test" ]
 
 FROM development-service AS test-service
-COPY --chown=node:node jest.config.js ./jest.config.js
+COPY --chown=node:node vitest.config.js ./vitest.config.js
 COPY --chown=node:node test/ ./test/
 CMD [ "npm", "run", "test" ]
 
