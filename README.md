@@ -24,13 +24,11 @@ Two parent images are created for each version:
 
 It is recommended that services use [multi-stage builds](https://docs.docker.com/develop/develop-images/multistage-build) to produce production and development images, each extending the appropriate parent, from a single Dockerfile.
 
-### Example files
+### Example file
 
-[Examples](https://github.com/DEFRA/defra-docker-node/tree/main/examples) are provided to show how parent images can be extended for different types of services. These should be a good starting point for building Node services conforming to Defra standards.
+[`examples/Dockerfile`](https://github.com/DEFRA/defra-docker-node/tree/main/examples) shows how the parent images can be extended for different types of services. It should be a good starting point for building Node services conforming to Defra standards.
 
-`Dockerfile.web` - This is an example web project, that requires a build step to create some static files that are used by the web front end.
-
-`Dockerfile.service` - This is an example project that doesn't expose any external ports (a message based service). There is also no build step in this Dockerfile.
+Two service archetypes are shown as separate targets, sharing common `base`/`development` stages: `production-web`/`development-web`/`test-web` (a web project that exposes a port and has a build step to create static files for the front end), and `production-service`/`development-service`/`test-service` (a message-based service with no exposed ports and no build step). Build or run only the target that matches your service, e.g. `docker build --target production-web .`, and delete the stages for the archetype you don't need once you've copied this into your own repo.
 
 ## Supported Node.js versions
 

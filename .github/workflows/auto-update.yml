@@ -105,7 +105,7 @@ jobs:
           latest_alpine_version=$(jq -r '.[] | select(.tags[] == "latest") | .alpineVersion' image-matrix.json)
           sed -i "s/ARG BASE_VERSION=.*/ARG BASE_VERSION=${latest_node_version}-alpine${latest_alpine_version}/" Dockerfile
           sed -i "s/ARG DEFRA_VERSION=.*/ARG DEFRA_VERSION=${new_defra_version}/" Dockerfile
-          sed -i "s/ARG BASE_VERSION=.*/ARG BASE_VERSION=${new_defra_version}-node${latest_node_version}/" examples/Dockerfile.web examples/Dockerfile.service
+          sed -i "s/ARG PARENT_VERSION=.*/ARG PARENT_VERSION=${new_defra_version}-node${latest_node_version}/" examples/Dockerfile
           echo "Updated Dockerfile and examples"
 
       - name: Prepare pull request details
