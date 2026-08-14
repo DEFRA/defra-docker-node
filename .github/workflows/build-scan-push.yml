@@ -213,8 +213,6 @@ jobs:
           format: spdx-json
           artifact-name: sbom-node-${{ matrix.image.nodeVersion }}.spdx.json
           dependency-snapshot: true
-          # Major version only (not the full patch version), so patch bumps update the
-          # same Dependency Graph entry instead of each one minting a new, orphaned one.
           dependency-snapshot-correlator: docker-image-node-${{ steps.setImageDetails.outputs.nodeMajor }}
 
   required-check:
