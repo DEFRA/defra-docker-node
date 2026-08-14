@@ -24,13 +24,9 @@ Two parent images are created for each version:
 
 It is recommended that services use [multi-stage builds](https://docs.docker.com/develop/develop-images/multistage-build) to produce production and development images, each extending the appropriate parent, from a single Dockerfile.
 
-### Example files
+### Example file
 
-[Examples](https://github.com/DEFRA/defra-docker-node/tree/main/examples) are provided to show how parent images can be extended for different types of services. These should be a good starting point for building Node services conforming to Defra standards.
-
-`Dockerfile.web` - This is an example web project, that requires a build step to create some static files that are used by the web front end.
-
-`Dockerfile.service` - This is an example project that doesn't expose any external ports (a message based service). There is also no build step in this Dockerfile.
+[`examples/Dockerfile`](https://github.com/DEFRA/defra-docker-node/tree/main/examples) shows how the parent images can be extended for a Node service, with `development` and `production` targets. There's no separate stage for running tests — run `npm test` directly, on the host or in CI, against the same source tree used by the `development` stage. If your service has no build step, delete the `RUN npm run build` lines and copy from the `development` stage directly in the production stage instead of from `production-build`.
 
 ## Supported Node.js versions
 
@@ -63,6 +59,34 @@ A GitHub Action runs a nightly scan of the images published to Docker Hub using 
 A build is only blocked by vulnerabilities that have a fix available, so unpatchable findings do not stop delivery. The nightly scan records every finding, fixable and unfixable, in a single tracking issue labelled `security-scan`.
 
 For more details see [Image Scanning](IMAGE_SCANNING.md)
+
+## Software Bill of Materials (SBOM)
+
+On every push to `main`, each production image variant has an SBOM generated from its actual container contents using [Syft](https://github.com/anchore/syft) (via [anchore/sbom-action](https://github.com/anchore/sbom-action)), which is:
+
+- submitted to this repository's Dependency graph, so vulnerable OS packages and runtime dependencies show up alongside Dependabot alerts, and
+- uploaded as a downloadable workflow artifact for that run.
+
+The image pushed to Docker Hub also carries the same SBOM as a build attestation (`docker buildx build --sbom=true`). You can inspect it directly from the published image without pulling it:
+
+```
+docker buildx imagetools inspect defradigital/node:<tag> --format '{{json (index .SBOM "linux/amd64").SPDX}}'
+```
+
+### Retiring a version
+
+Each supported Node major version submits its SBOM to the Dependency Graph under its own
+correlator (`docker-image-node-<major>`), and GitHub only ever shows the *latest* submission
+for a given correlator. So if a version is simply deleted from [image-matrix.json](image-matrix.json)
+once it drops out of LTS, nothing ever submits again for that correlator, and the Dependency
+Graph (and any Dependabot alerts derived from it) would keep showing that version's packages
+forever, frozen at whatever they were on its last build.
+
+To retire a version cleanly, run [`scripts/retire-version.sh`](scripts/retire-version.sh) with
+the major version, e.g. `./scripts/retire-version.sh 22`. It removes the version from
+`image-matrix.json` and the table above, and submits an empty snapshot for that version's
+correlator to clear it from the Dependency Graph. Review the resulting diff, then commit it and
+open a PR as normal. Requires `jq` and an authenticated `gh` CLI.
 
 ## Automated version updates
 
