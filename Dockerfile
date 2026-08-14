@@ -1,5 +1,5 @@
 # Set default values for build arguments
-ARG DEFRA_VERSION=3.1.2
+ARG DEFRA_VERSION=3.1.3
 ARG BASE_VERSION=24.19.0-alpine3.24
 ARG NPM_VERSION=12.0.2
 
