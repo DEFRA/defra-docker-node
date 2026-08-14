@@ -1,0 +1,9 @@
+node_modules
+Dockerfile
+.dockerignore
+.git
+.env
+coverage
+**/*.test.js
+LICENCE
+README.md
