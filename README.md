@@ -73,6 +73,21 @@ The image pushed to Docker Hub also carries the same SBOM as a build attestation
 docker buildx imagetools inspect defradigital/node:<tag> --format '{{json (index .SBOM "linux/amd64").SPDX}}'
 ```
 
+### Retiring a version
+
+Each supported Node major version submits its SBOM to the Dependency Graph under its own
+correlator (`docker-image-node-<major>`), and GitHub only ever shows the *latest* submission
+for a given correlator. So if a version is simply deleted from [image-matrix.json](image-matrix.json)
+once it drops out of LTS, nothing ever submits again for that correlator, and the Dependency
+Graph (and any Dependabot alerts derived from it) would keep showing that version's packages
+forever, frozen at whatever they were on its last build.
+
+To retire a version cleanly, run [`scripts/retire-version.sh`](scripts/retire-version.sh) with
+the major version, e.g. `./scripts/retire-version.sh 22`. It removes the version from
+`image-matrix.json` and the table above, and submits an empty snapshot for that version's
+correlator to clear it from the Dependency Graph. Review the resulting diff, then commit it and
+open a PR as normal. Requires `jq` and an authenticated `gh` CLI.
+
 ## Automated version updates
 
 The [auto-update](/.github/workflows/auto-update.yml) workflow runs nightly. It checks for new releases of Node.js (and their Alpine images) and of the npm CLI, and when it finds one it opens a pull request that bumps the affected versions across the [image-matrix.json](image-matrix.json), [JOB.env](JOB.env), [Dockerfile](Dockerfile), [README.md](README.md) and the [examples](examples).
