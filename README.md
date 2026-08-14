@@ -28,7 +28,7 @@ It is recommended that services use [multi-stage builds](https://docs.docker.com
 
 [`examples/Dockerfile`](https://github.com/DEFRA/defra-docker-node/tree/main/examples) shows how the parent images can be extended for different types of services. It should be a good starting point for building Node services conforming to Defra standards.
 
-Two service archetypes are shown as separate targets, sharing common `base`/`development` stages: `production-web`/`development-web`/`test-web` (a web project that exposes a port and has a build step to create static files for the front end), and `production-service`/`development-service`/`test-service` (a message-based service with no exposed ports and no build step). Build or run only the target that matches your service, e.g. `docker build --target production-web .`, and delete the stages for the archetype you don't need once you've copied this into your own repo.
+Two service archetypes are shown as separate targets, sharing a common `development` stage: `production-web`/`development-web` (a web project that exposes a port and has a build step to create static files for the front end), and `production-service`/`development-service` (a message-based service with no exposed ports and no build step). There's no separate stage for running tests — run `npm test` directly, on the host or in CI, against the same source tree used by the `development` stage. Build or run only the target that matches your service, e.g. `docker build --target production-web .`, and delete the stages for the archetype you don't need once you've copied this into your own repo.
 
 ## Supported Node.js versions
 
