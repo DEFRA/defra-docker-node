@@ -55,6 +55,9 @@ jobs:
           echo "dockerRepoName=$DOCKER_REPO_NAME" >> $GITHUB_OUTPUT
           echo "fullImageName=$DOCKER_REPO_NAME:$DEFRA_VERSION-node${{matrix.image.nodeVersion}}" >> $GITHUB_OUTPUT
 
+          # Major only, so the Dependency Graph correlator stays stable across patch bumps
+          echo "nodeMajor=$(echo '${{matrix.image.nodeVersion}}' | cut -d. -f1)" >> $GITHUB_OUTPUT
+
           if [ ${{matrix.image.latest}} = true ]
           then
             echo "latestTag=--tag $DOCKER_REPO_NAME:latest" >> $GITHUB_OUTPUT
@@ -210,7 +213,9 @@ jobs:
           format: spdx-json
           artifact-name: sbom-node-${{ matrix.image.nodeVersion }}.spdx.json
           dependency-snapshot: true
-          dependency-snapshot-correlator: docker-image-node-${{ matrix.image.nodeVersion }}
+          # Major version only (not the full patch version), so patch bumps update the
+          # same Dependency Graph entry instead of each one minting a new, orphaned one.
+          dependency-snapshot-correlator: docker-image-node-${{ steps.setImageDetails.outputs.nodeMajor }}
 
   required-check:
     # Single stable-named gate for branch protection. The matrix jobs are named per
