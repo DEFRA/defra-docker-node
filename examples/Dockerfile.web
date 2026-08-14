@@ -1,7 +1,7 @@
 # This assumes that the parent image has been built locally using production and development build configuration as defra-node 
 # and defra-node-development tagged with a version.
 
-ARG BASE_VERSION=3.1.3-node24.19.0
+ARG BASE_VERSION=3.1.4-node24.19.0
 FROM defra-node:$BASE_VERSION AS base
 
 # Set the port that is going to be exposed later on in the Dockerfile as well.
@@ -10,9 +10,7 @@ ENV PORT=${PORT}
 
 # Copy our package files so that our package install will do a clean install. This installs the exact versions of the packages
 #   listed in package-lock.json, and does not update either the package-lock.json or the package.json file.
-# Our production dependencies are now installed.
 COPY --chown=node:node package*.json ./
-RUN npm ci --ignore-scripts
 
 # Development stage installs devDependencies, builds app from source and declares a file watcher as the default command.
 #   We name this stage so we can refer to it in later stages
@@ -25,7 +23,7 @@ EXPOSE ${PORT} 9229
 COPY --from=base --chown=node:node /home/node/package*.json ./
 
 # We run a full dev install to bring in any development packages
-RUN npm install --production=false --ignore-scripts
+RUN npm ci --ignore-scripts
 COPY --chown=node:node app/ ./app/
 
 # Run the build command to get the extra files needed for production. We also specify a command here,
@@ -52,9 +50,18 @@ WORKDIR /home/node
 # Expose the PORT passed in at the start of the file
 EXPOSE ${PORT}
 
-# Copy in the files that we built using the tools in the development stage. The final production stage will have the built files,
-#   but none of the tools required to build those files. This reduces the attack surface, and also the size of the final production image
-COPY --from=development /home/node/app/ ./app/
+# Switch to root temporarily to install production dependencies and lock down file permissions.
+USER root
+
+# Copy in the files that we built using the tools in the development stage, assigning root
+#   ownership to prevent modification by other users. This reduces the attack surface, and
+#   also the size of the final production image.
+COPY --from=development --chown=root:root /home/node/package*.json ./
+COPY --from=development --chown=root:root /home/node/app/ ./app/
+
+# Install node modules, remove write permissions, then drop back to the unprivileged user.
+RUN npm ci --ignore-scripts --omit=dev && chmod -R a-w /home/node
+USER node
 
 # This is the command that is run for the production service. The parent image has an ENTRYPOINT that uses a lightweight
 #   init program "tini" that handles signals. As long as we don't override the ENTRYPOINT the "tini" routine will handle signals and
