@@ -27,7 +27,6 @@ jobs:
   build-images:
     runs-on: ubuntu-latest
     permissions:
-      # write is only exercised by the Dependency Graph submission step, gated to main/production
       contents: write
     needs:  get-matrix-values
     strategy:
@@ -211,8 +210,6 @@ jobs:
           format: spdx-json
           artifact-name: sbom-node-${{ matrix.image.nodeVersion }}.spdx.json
           dependency-snapshot: true
-          # Matrix builds don't get a unique correlator by default, so snapshots would
-          # overwrite each other in the Dependency Graph without this.
           dependency-snapshot-correlator: docker-image-node-${{ matrix.image.nodeVersion }}
 
   required-check:
