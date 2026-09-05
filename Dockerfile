@@ -26,7 +26,7 @@ ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/internal-ca.crt
 # CVE-2026-63073, CVE-2026-63074, CVE-2026-63075 and CVE-2026-63076 (fixed in
 # 3.5.8-r0, which also pulls in the matching libcrypto3). Remove once the base
 # image itself bundles a fixed version.
-RUN apk add --no-cache tini ca-certificates 'libssl3>3.5.7' \
+RUN apk add --no-cache tini ca-certificates 'libssl3>=3.5.8' \
     && npm install -g --ignore-scripts --prefix=/usr/local "npm@${NPM_VERSION}" \
     && npm cache clean --force
 
