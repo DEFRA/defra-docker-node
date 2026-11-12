@@ -1,6 +1,6 @@
 # Set default values for build arguments
-ARG DEFRA_VERSION=3.2.7
-ARG BASE_VERSION=26.13.0-alpine3.24
+ARG DEFRA_VERSION=3.2.8
+ARG BASE_VERSION=26.13.1-alpine3.24
 ARG NPM_VERSION=12.2.2
 
 FROM node:$BASE_VERSION AS production
@@ -21,12 +21,10 @@ ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/internal-ca.crt
 # is replaced rather than a second copy installed under NPM_CONFIG_PREFIX.
 # NPM_VERSION is kept current by the auto-update workflow.
 #
-# libssl3 is pinned above the base image's bundled version to pick up the fix for
-# CVE-2026-14456, CVE-2026-14457, CVE-2026-18798, CVE-2026-54874, CVE-2026-63072,
-# CVE-2026-63073, CVE-2026-63074, CVE-2026-63075 and CVE-2026-63076 (fixed in
-# 3.5.8-r0, which also pulls in the matching libcrypto3). Remove once the base
-# image itself bundles a fixed version.
-RUN apk add --no-cache tini ca-certificates 'libssl3>=3.5.8' \
+# zlib is pinned above the base image's bundled 1.3.2-r1 to pick up the fix for
+# CVE-2026-4738 (fixed in 1.4-r0). Remove once the base image itself bundles a
+# fixed version.
+RUN apk add --no-cache tini ca-certificates 'zlib>=1.4' \
     && npm install -g --ignore-scripts --prefix=/usr/local "npm@${NPM_VERSION}" \
     && npm cache clean --force
 
